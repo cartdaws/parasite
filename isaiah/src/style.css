@@ -1,0 +1,42 @@
+:root { --ink: #1b120e; --paper: #e8dcc0; --blood: #c8281e; --bile: #d8c840; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #050304; overflow: hidden; color: var(--paper);
+  font-family: "Patrick Hand", "Comic Neue", "Comic Sans MS", "Chalkboard SE", "Marker Felt", "Segoe Print", cursive; user-select: none; }
+canvas#gl, canvas#hud { position: fixed; inset: 0; display: block; }
+canvas#hud { pointer-events: none; }
+#ui { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5,3,4,0.72); }
+#ui.active { display: flex; }
+#panels { position: fixed; inset: 0; display: none; background: #050304; align-items: center; justify-content: center; flex-direction: column; }
+#panels.active { display: flex; }
+#panels canvas { max-width: 96vw; max-height: 80vh; }
+#panels .hint { margin-top: 10px; opacity: 0.6; font-size: 18px; }
+.menu { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 28px; max-width: 96vw; max-height: 96vh; overflow: auto; }
+.menu.title { background: none; }
+.menu h2 { margin: 0 0 4px; font-size: 40px; color: var(--paper); text-shadow: 3px 3px 0 var(--ink), -2px -2px 0 var(--ink), 2px -2px 0 var(--ink), -2px 2px 0 var(--ink); transform: rotate(-1deg); }
+.title-art { width: min(760px, 94vw); height: auto; }
+.col { display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 240px; }
+.col.row2 { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+.row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.btn { font: inherit; font-size: 24px; padding: 6px 22px; background: #2a1c16; color: var(--paper); border: 3px solid var(--ink);
+  border-radius: 12px 6px 14px 8px; box-shadow: 3px 4px 0 var(--ink); cursor: pointer; transition: transform .06s; }
+.btn:nth-child(even) { border-radius: 6px 14px 8px 12px; }
+.btn.focus, .btn:hover { background: #6a2018; transform: rotate(-1.2deg) scale(1.04); color: #fff4dc; }
+.small { font-size: 18px; opacity: 0.9; text-align: center; }
+.dim { opacity: 0.55; }
+.seed { font-size: 26px; letter-spacing: 2px; color: var(--bile); }
+.charcard { width: 200px; padding: 12px; background: #1c1210; border: 3px solid var(--ink); border-radius: 14px 8px 16px 10px; box-shadow: 4px 5px 0 var(--ink);
+  display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.charcard.sel { background: #4a1a14; transform: rotate(-1deg); outline: 3px dashed var(--bile); }
+.charcard.locked { cursor: default; opacity: 0.7; }
+.cname { font-size: 28px; }
+.seedrow { display: flex; gap: 10px; align-items: center; font-size: 22px; }
+.seedrow input { font: inherit; font-size: 22px; width: 160px; padding: 4px 10px; background: #e8dcc0; color: var(--ink); border: 3px solid var(--ink); border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; }
+.optrow { display: flex; gap: 16px; align-items: center; font-size: 22px; width: 340px; justify-content: space-between; }
+.optrow input[type=range] { width: 160px; accent-color: var(--blood); }
+.items { display: flex; flex-wrap: wrap; gap: 4px; max-width: 520px; justify-content: center; margin: 6px 0; }
+.item { position: relative; width: 48px; height: 48px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+.item .tip { display: none; position: absolute; left: 50%; bottom: 52px; transform: translateX(-50%); white-space: nowrap; background: var(--paper); color: var(--ink);
+  padding: 2px 8px; border-radius: 6px; font-size: 16px; z-index: 5; border: 2px solid var(--ink); }
+.item:hover .tip { display: block; }
+.note { width: min(520px, 92vw); height: auto; transform: rotate(-1.5deg); }
+.unlock { font-size: 24px; color: var(--bile); text-align: center; max-width: 520px; }
