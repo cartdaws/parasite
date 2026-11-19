@@ -29,7 +29,7 @@ npm run build      # static build in dist/
 | Restart run | hold R | hold Back+Start |
 
 ## What's in it
-- **Floors**: 13×13 cell grid grown breadth-first from the center (`3.33 × floor + 5–6` rooms), dead ends become Boss / Treasure / Shop rooms, plus optional Sacrifice, Challenge, Arcade and Library rooms and a hidden Secret room (bomb the wall; some walls show a tinted crack). 1×1, 1×2, 2×1, 2×2 and L-shaped rooms. 48 hand-authored 13×7 ASCII templates (`src/world/templates.js`), mirrored for variety.
+- **Floors**: 13×13 cell grid grown breadth-first from the center (`3.33 × floor + 5–6` rooms), dead ends become Boss / Treasure / Shop rooms, plus optional Sacrifice, Challenge, Arcade and Library rooms and a hidden Secret room (bomb the wall; some walls show a tinted crack). 1×1, 1×2, 2×1, 2×2 and L-shaped rooms. 47 hand-authored 13×7 ASCII templates (`src/world/templates.js`), mirrored for variety.
 - **Doors** lock when you enter a room with enemies and slam open when it's clear; clears can drop a luck-weighted reward. Shops/libraries need a key, arcades a coin.
 - **31 enemy types** (flies, chasers, chargers, turrets, aligned shooters, hoppers, burrowers, spiders, splitting clots, exploders, creep-leavers, ghosts, a shielded knight, lobbers...) and **6 champion variants**.
 - **8 two-phase bosses** — The Lump, Mother Mildew, Taproot, The Rot Twins (shared bar), The Drowned Hog, The Well-Keeper, The Kiln Father, The Ash Hound — and **The Housemother**, whose foot, arms and eyes come through the walls and floor before her heart is exposed. Boss intro cards are skippable.
