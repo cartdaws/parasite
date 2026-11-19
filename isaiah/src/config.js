@@ -71,7 +71,7 @@ export const CFG = {
   ROOMS_PER_FLOOR_ADD: [5, 6], // random extra rooms
   ROOMS_MAX: 22,
   LABYRINTH_ROOM_MULT: 1.75,
-  BIG_ROOM_CHANCE: 0.12,      // chance per growth step to try a big room
+  BIG_ROOM_CHANCE: 0.22,      // chance per growth step to try a big room
   SECRET_ROOM_CHANCE: 0.85,
   OPTIONAL_ROOMS: {           // chance per floor of optional special rooms
     sacrifice: 0.22, challenge: 0.3, arcade: 0.28, library: 0.18,

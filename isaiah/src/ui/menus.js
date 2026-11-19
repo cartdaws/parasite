@@ -33,6 +33,15 @@ export class UI {
   hideBossIntro() { this.hud.hideBossIntro(); }
   restartRun() { this.startRun(randomSeedString(), this.charId); }
 
+  /** gamepad menu navigation (called every tick) */
+  padNav(inp) {
+    if (!this.screen || !this.buttons.length) return;
+    if (inp.pressed('menuDown')) { this.focusIdx = (this.focusIdx + 1) % this.buttons.length; this.updateFocus(); audio.play('select'); }
+    if (inp.pressed('menuUp')) { this.focusIdx = (this.focusIdx - 1 + this.buttons.length) % this.buttons.length; this.updateFocus(); audio.play('select'); }
+    if (inp.pressed('confirm') && inp.usingPad) this.buttons[this.focusIdx]?.click();
+    if (inp.pressed('back') && this.onBack) this.onBack();
+  }
+
   // ---- screens -------------------------------------------------------------------
   clear() { this.root.innerHTML = ''; this.root.className = ''; this.screen = null; this.buttons = []; }
   panel(cls) {

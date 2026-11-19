@@ -192,12 +192,13 @@ export class Game {
     if (!can) return;
     if (d.lock === 'key' && !p.hasItem('skeleton_key')) p.keys--;
     if (d.lock === 'coin') p.coins--;
+    const wasCoin = d.lock === 'coin';
     d.lock = null;
     const other = S.floor.rooms[d.to];
     const back = this.matchingDoor(S.room, d, other);
     if (back) back.lock = null;
     S.view.updateDoor(d);
-    audio.play(d.lock === 'coin' ? 'coin' : 'key');
+    audio.play(wasCoin ? 'coin' : 'key');
     audio.play('doorOpen');
   }
   matchingDoor(fromRoom, d, toRoom) {
@@ -260,6 +261,7 @@ export class Game {
   // ===========================================================================
   update(dt) {
     input.update();
+    this.ui.padNav(input);
     this.stateT += dt;
     if (S.run) S.run.time += this.state === 'play' ? dt : 0;
     // hold R to restart the run

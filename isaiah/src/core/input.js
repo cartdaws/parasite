@@ -88,7 +88,10 @@ class Input {
       if (edge(9)) this.justPressed.add('pause');
       if (edge(8)) this.justPressed.add('map');
       if (edge(0)) this.justPressed.add('confirm');
-      if (b.some((x, i) => x && !this.padPrev[i])) this.anyKey = true;
+      if (edge(12)) this.justPressed.add('menuUp');
+      if (edge(13)) this.justPressed.add('menuDown');
+      if (edge(1)) this.justPressed.add('back');
+      if (b.some((x, i) => x && !this.padPrev[i])) { this.anyKey = true; this.usingPad = true; }
       this.padPrev = b;
       this.padHeldRestart = b[8] && b[9];
     }

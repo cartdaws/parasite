@@ -18,3 +18,7 @@ Phone: left thumb moves (push far to run) · right thumb looks · on-screen LEAP
 `src/map.js` (deck grid) → `world.js` (geometry, doors, collision, sight, paths) · `characters.js` (low-poly figures) · `actors.js` (bodies + crew AI) · `player.js` (possession, camera) · `game.js` (rules: alarm, shooting, turret, win/lose) · `hud.js` · `input.js` · `audio.js` · `fx.js`.
 
 `npm run dev` · `npm run build` · `npm run smoke` (headless test of the core loop, desktop + phone)
+
+---
+
+Also in this repo: **[The Finding of Isaiah](isaiah/)** — a roguelike twin-stick crawler (`cd isaiah && npm install && npm run dev`).

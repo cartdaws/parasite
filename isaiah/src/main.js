@@ -32,5 +32,7 @@ window.__S = S;
 import('./entities/enemies.js').then((m) => { window.__DEFS = m.DEFS; window.__spawnEnemy = m.spawnEnemy; });
 import('./entities/pickups.js').then((m) => { window.__spawnPickup = m.spawnPickup; });
 import('./items/items.js').then((m) => { window.__ITEMS = m.ITEMS; });
+import('./items/logic.js').then((m) => { window.__logic = m; });
+import('./items/consumables.js').then((m) => { window.__cons = m; });
 window.__game = game;
 window.__ui = ui;

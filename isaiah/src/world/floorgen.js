@@ -173,9 +173,11 @@ function tryGenerate(rng, floorNum, target, N, opts) {
     for (const d of r.doors) {
       const other = rooms[d.to];
       const types = [r.type, other.type];
-      d.kind = DOOR_PRIORITY.find((t) => types.includes(t)) || 'normal';
-      d.hidden = d.kind === 'secret';
+      d.kind = types.includes('secret') ? 'secret' : DOOR_PRIORITY.find((t) => types.includes(t)) || 'normal';
+      // hidden from outside only: from inside a secret room you can always see the way out
+      d.hidden = d.kind === 'secret' && r.type !== 'secret';
       d.lock = null;
+      if (d.kind === 'secret') continue;
       // locked doors only when entering the special room from outside
       if (other.type === 'shop' || other.type === 'library') d.lock = 'key';
       if (other.type === 'arcade') d.lock = 'coin';

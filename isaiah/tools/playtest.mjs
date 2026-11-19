@@ -61,7 +61,86 @@ async function startRun(seed = 'TEST 0001', ch) {
   for (let i = 0; i < 6; i++) { const on = await evalg(() => document.getElementById('panels').classList.contains('active')); if (!on) break; await page.keyboard.press('Escape'); await wait(300); }
   await wait(500);
 }
+const scenarios0 = {
+  async tour() {
+    await startRun(process.argv[4] || 'TOUR 0001');
+    for (let floor = 1; floor <= 5; floor++) {
+      const n = await evalg(() => __S.floor.rooms.length);
+      console.log('floor', floor, 'rooms', n, await evalg(() => __S.floor.rooms.map((r) => r.type[0] + r.shape).join(' ')));
+      for (let i = 0; i < n; i++) {
+        await evalg((i) => { const p = __S.player; p.invuln = 99; p.red = p.maxRed; const r = __S.floor.rooms[i]; if (r === __S.room) return; __game.transitionTo(r, r.doors[0], 'slide'); }, i);
+        await wait(450);
+        await hold(['ArrowRight', 'KeyA'], 250);
+        await evalg(() => { for (const e of __S.enemies) if (e.alive && !e.isBoss) e.die({}); for (const e of __S.enemies) if (e.alive && e.isBoss && e.type !== 'boss_housemother') { e.hp = 1; e.hurt(5, {}); } });
+        await wait(250);
+      }
+      await shot('tour-f' + floor);
+      if (floor === 2) { // force a deal door and visit it
+        await evalg(async () => { const r = __S.floor.rooms.find((r) => r.type === 'boss'); __game.transitionTo(r, r.doors[0], 'fade'); });
+        await wait(800);
+        await evalg(() => { const m = window.__logic; m.openDealDoor(__S.room, 'bargain'); const d = __S.room.doors.find((d) => d.kind === 'bargain'); __game.goThroughDoor(d); });
+        await wait(800); await shot('deal-bargain');
+        await evalg(() => { const pk = __S.pickups.find((p) => p.kind === 'pedestal'); if (pk) { __S.player.x = pk.x; __S.player.z = pk.z; } });
+        await wait(600); await shot('deal-took');
+      }
+      if (floor < 5) await evalg((f) => __game.startFloor(f + 1), floor);
+      await wait(600);
+    }
+  },
+  async allitems() {
+    await startRun();
+    await evalg(() => { const p = __S.player; p.invuln = 999; for (const id of Object.keys(window.__ITEMS)) { if (window.__ITEMS[id].type !== 'active') __game.giveItem(p, id); } });
+    const r = await evalg(() => __S.floor.rooms.find((r) => r.type === 'normal' && r.cells.length === 1).id);
+    await evalg((id) => { const r = __S.floor.rooms[id]; __game.transitionTo(r, r.doors[0], 'fade'); }, r);
+    await wait(800);
+    await hold(['ArrowLeft', 'KeyD'], 2500);
+    await shot('allitems');
+    // actives, cards, pills
+    const errs = await evalg(async () => {
+      const out = []; const p = __S.player;
+      for (const [id, it] of Object.entries(window.__ITEMS)) if (it.type === 'active') { try { p.active = { id, charge: 99 }; __game.useActive(p); } catch (e) { out.push(id + ':' + e.message); } }
+      return out;
+    });
+    console.log('active errs', errs);
+    await wait(1200);
+    const errs2 = await evalg(async () => {
+      const out = []; const p = __S.player; const c = window.__cons;
+      for (const id of Object.keys(c.CARDS)) { try { p.pocket = { type: 'card', id }; __game.usePocket(p); } catch (e) { out.push(id + ':' + e.message); } }
+      for (const id of Object.keys(c.PILLS)) { try { p.pocket = { type: 'pill', id }; __game.usePocket(p); } catch (e) { out.push(id + ':' + e.message); } }
+      return out;
+    });
+    console.log('pocket errs', errs2);
+    await wait(1500); await shot('allitems-after');
+    console.log(JSON.stringify(await evalg(() => ({ state: __game.state, stats: __S.player.stats, items: __S.player.items.length }))));
+  },
+  async perf() {
+    await startRun();
+    await evalg(() => { const p = __S.player; p.invuln = 999; for (const id of ['crybaby_bib', 'onion_skin', 'third_eye_patch', 'cracked_marble', 'bent_fork']) __game.giveItem(p, id); });
+    const r = await evalg(() => __S.floor.rooms.find((r) => r.type === 'normal' && r.cells.length === 1).id);
+    await evalg((id) => { const r = __S.floor.rooms[id]; __game.transitionTo(r, r.doors[0], 'fade'); }, r);
+    await wait(800);
+    await evalg(() => { for (let i = 0; i < 24; i++) { const e = window.__spawnEnemy(['moaner', 'gnat', 'pipe', 'clot', 'spider'][i % 5], 1 + (i % 12), 1 + Math.floor(i / 12) * 4); if (e) e.maxHp = e.hp = 9999; } });
+    await evalg(() => { __S.player.x = 6.5; __S.player.z = 5.5; for (const e of __S.enemies) { e.status.freeze = 999; } const g = __game; const u = g.update.bind(g), r = g.render.bind(g); window.__ut = []; g.update = (dt) => { const t = performance.now(); u(dt); window.__ut.push(performance.now() - t); }; g.render = (dt) => { const t = performance.now(); r(dt); window.__ut.push(performance.now() - t); }; });
+    await page.keyboard.down('ArrowUp');
+    await evalg(() => import('/src/entities/tears.js').then((m) => { window.__keepTears = setInterval(() => { while (__S.tears.length < 80) { const a = Math.random() * 6.28; m.spawnTear({ x: 6.5, z: 3.5, vx: Math.cos(a) * 4, vz: Math.sin(a) * 4, dmg: 0.01, range: 12, owner: 'player', flags: { bounce: 1 } }); } }, 50); }));
+    await evalg(() => { window.__frames = []; let last = performance.now(); const f = (t) => { window.__frames.push(t - last); last = t; if (window.__frames.length < 300) requestAnimationFrame(f); }; requestAnimationFrame(f); });
+    await wait(6000);
+    await shot('perf');
+    await page.keyboard.up('ArrowUp');
+    console.log(JSON.stringify(await evalg(() => { const f = window.__frames.slice(10); f.sort((a, b) => a - b); const u = window.__ut.slice(60).sort((a, b) => a - b); return { updMedian: u[Math.floor(u.length / 2)].toFixed(2), updP99: u[Math.floor(u.length * 0.99)].toFixed(2), n: f.length, median: f[Math.floor(f.length / 2)].toFixed(1), p95: f[Math.floor(f.length * 0.95)].toFixed(1), tears: __S.tears.length, shots: __S.shots.length, enemies: __S.enemies.length, fx: __S.fx.length }; })));
+  },
+};
 const scenarios = {
+  ...scenarios0,
+  async bigroom() {
+    await startRun('ABCD 1234');
+    await evalg(() => __game.startFloor(4)); await wait(500);
+    for (const shape of ['L10', '2x2']) {
+      await evalg((shape) => { const p = __S.player; p.invuln = 99; const r = __S.floor.rooms.find((r) => r.shape === shape); __game.transitionTo(r, r.doors[0], 'fade'); }, shape);
+      await wait(900); await shot('big-' + shape);
+      await fight(5000); await shot('big-' + shape + '-b');
+    }
+  },
   async gallery() {
     await startRun();
     // all enemies frozen in the start room
