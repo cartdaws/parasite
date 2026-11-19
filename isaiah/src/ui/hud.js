@@ -83,7 +83,8 @@ export class HUD {
     const sp = worldToScreen(S.room.originX + p.x, 0.5, S.room.originZ + p.z);
     const px = sp.x * this.dpr, py = sp.y * this.dpr;
     const fl = S.floorNum;
-    const dark = S.run.curse === 'darkness';
+    const candle = p.hasItem('candle_stub');
+    const dark = S.run.curse === 'darkness' && !candle;
     // room-edge darkness (always on, stronger on deeper floors)
     const cx = w / 2, cy = h / 2;
     const g = ctx.createRadialGradient(cx, cy, Math.min(w, h) * 0.35, cx, cy, Math.max(w, h) * 0.62);

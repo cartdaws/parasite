@@ -174,9 +174,12 @@ export class RoomView {
   updateDoor(d) {
     const s = d.spr;
     if (!s) return;
-    if (d.hidden) { s.visible = false; return; }
+    // hidden secret doors: about half show a faint tinted crack in the wall as a hint
+    const hint = d.hidden && ((d.tx * 7 + d.ty * 13 + this.room.id) % 2 === 0);
+    if (d.hidden && !hint) { s.visible = false; return; }
     s.visible = true;
-    const state = d.lock ? 'locked' : d.closed ? 'closed' : 'open';
+    s.material.opacity = hint ? 0.55 : 1;
+    const state = d.hidden ? 'closed' : d.lock ? 'locked' : d.closed ? 'closed' : 'open';
     s.material.map = doorTex(d.kind, state, d.side);
     // sit each frame over its wall; side/bottom doors are centered on the wall top
     if (d.side === 0) { s.center.set(0.5, 0); s.position.set(d.x, 0.02, d.z + 0.1); s.scale.set(2.0, 2.0, 1); }
@@ -209,7 +212,7 @@ export class RoomView {
     for (const s of this.obstacleSprites.values()) freeSprite(s);
     for (const s of this.doorSprites) freeSprite(s);
     // free any entity sprites still in the layer
-    for (const c of [...this.layer.children]) { if (c.isSprite) freeSprite(c); else if (c.isMesh) freeFlat(c); else this.layer.remove(c); }
+    for (const c of [...this.layer.children]) { if (c.userData.keep) { this.layer.remove(c); continue; } if (c.isSprite) freeSprite(c); else if (c.isMesh) freeFlat(c); else this.layer.remove(c); }
     gfx.scene.remove(this.group);
     for (const d of this.disposables) d.dispose();
     for (const d of this.wallDisposables) d.dispose();

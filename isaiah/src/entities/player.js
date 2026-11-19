@@ -51,6 +51,7 @@ export class Player {
     this.head = makeSprite(headTex(charId, 2, 'idle', null), 1.15, 1.15);
     this.held = makeSprite(bodyTex(charId, 2, 0, null), 0.8, 0.8); this.held.visible = false;
     this.shadow = makeShadow(0.75);
+    for (const o of [this.spr, this.head, this.held, this.shadow]) o.userData.keep = true;
     for (const id of base.startItems) if (ITEMS[id]) this.items.push(id);
     recalcStats(this);
     this.rebuildCosmetics();
@@ -305,16 +306,17 @@ export class Player {
     let htex = headTex(this.charId, holding ? 2 : this.headDir, mode, cos);
     if (this.flash > 0) { btex = flashTex(btex); htex = flashTex(htex); }
     setTex(this.spr, btex); setTex(this.head, htex);
-    this.spr.scale.set(0.9, 0.71, 1);
+    const sz = this.sizeMult || 1;
+    this.spr.scale.set(0.9 * sz, 0.71 * sz, 1);
     const blink = this.invuln > 0 && Math.floor(this.invuln * 12) % 2 === 0;
     this.spr.visible = this.head.visible = !blink;
     const fly = this.flying ? 0.22 + Math.sin(S.time * 5) * 0.06 : 0;
     const bob = this.walkT > 0 ? Math.abs(Math.sin(this.walkT * Math.PI / 2)) * 0.03 : 0;
     place(this.spr, this.x, this.z, fly, 0);
-    place(this.head, this.x, this.z, fly + 0.42 + bob - (this.charge > 0 ? 0.03 * Math.sin(S.time * 40) * this.charge : 0), 1);
+    place(this.head, this.x, this.z, fly + 0.42 * sz + bob - (this.charge > 0 ? 0.03 * Math.sin(S.time * 40) * this.charge : 0), 1);
     // charging squash
     const sq = this.charge > 0 ? 1 + this.charge * 0.08 : 1;
-    this.head.scale.set(1.15 * sq, 1.15 / sq, 1);
+    this.head.scale.set(1.15 * sq * sz, 1.15 / sq * sz, 1);
     if (holding) {
       this.held.visible = true;
       setTex(this.held, this.holding.tex);

@@ -99,12 +99,14 @@ export function makeSprite(texture, w, h, parent = gfx.layer) {
   }
   s.center.set(0.5, 0);
   s.scale.set(w, h, 1);
-  s.userData.baseTex = texture;
+  s.userData.free = false;
+  s.userData.keep = false;
   if (parent) parent.add(s);
   return s;
 }
 export function freeSprite(s) {
-  if (!s) return;
+  if (!s || s.userData.free) return;
+  s.userData.free = true;
   if (s.parent) s.parent.remove(s);
   s.material.blending = THREE.NormalBlending;
   spritePool.push(s);
@@ -129,13 +131,14 @@ export function makeFlat(texture, w, d, order = 300, parent = gfx.layer, opacity
     const mat = new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, depthTest: false });
     m = new THREE.Mesh(flatGeo, mat);
   } else { m.material.map = texture; m.visible = true; m.material.color.setRGB(1, 1, 1); }
+  m.userData.free = false; m.userData.keep = false;
   m.material.opacity = opacity;
   m.scale.set(w, 1, d);
   m.renderOrder = order;
   if (parent) parent.add(m);
   return m;
 }
-export function freeFlat(m) { if (!m) return; if (m.parent) m.parent.remove(m); flatPool.push(m); }
+export function freeFlat(m) { if (!m || m.userData.free) return; m.userData.free = true; if (m.parent) m.parent.remove(m); flatPool.push(m); }
 
 export const shadowTex = () => tex('shadow', 64, 32, (ctx, w, h) => {
   const g = ctx.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2);

@@ -8,6 +8,9 @@ import { HUD } from './ui/hud.js';
 import { UI, applySettings } from './ui/menus.js';
 import { S } from './state.js';
 import { CFG } from './config.js';
+import { setIconFn } from './items/items.js';
+import { itemIconTex } from './render/art_items.js';
+setIconFn(itemIconTex);
 
 save.load();
 initGfx(document.getElementById('gl'));
@@ -26,5 +29,8 @@ startLoop(
 ui.showTitle();
 // debugging / automated playtests
 window.__S = S;
+import('./entities/enemies.js').then((m) => { window.__DEFS = m.DEFS; window.__spawnEnemy = m.spawnEnemy; });
+import('./entities/pickups.js').then((m) => { window.__spawnPickup = m.spawnPickup; });
+import('./items/items.js').then((m) => { window.__ITEMS = m.ITEMS; });
 window.__game = game;
 window.__ui = ui;

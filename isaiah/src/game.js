@@ -18,7 +18,7 @@ import { spawnPickup, spawnReward } from './entities/pickups.js';
 import { spawnBomb } from './entities/bombs.js';
 import { spawnEnemy } from './entities/enemies.js';
 import { spawnBoss, BOSS_INFO } from './entities/bosses.js';
-import { syncFamiliars, updateFamiliars } from './entities/familiars.js';
+import { syncFamiliars, updateFamiliars, spawnBlueFly } from './entities/familiars.js';
 import { runHook } from './items/hooks.js';
 import { ITEMS, TRINKETS } from './items/items.js';
 import { CARDS, PILLS } from './items/consumables.js';
@@ -44,6 +44,7 @@ export class Game {
     S.player = new Player(charId);
     save.data.best.runs++; save.write();
     this.startFloor(1);
+    input.queue.clear(); input.justPressed.clear();
   }
   cleanupRun() {
     if (S.view) { clearEntities(); for (const f of S.familiars) f.destroy(); S.familiars.length = 0; S.view.dispose(); S.view = null; }
@@ -63,9 +64,10 @@ export class Game {
     floor.num = n;
     floor.dealDoorSpawned = false;
     S.floor = floor;
+    S.bossBarMax = 0;
     run.dealSeenOnFloor = false;
     const p = S.player;
-    p.damageTakenFloor = false; p.damageTakenBoss = false;
+    p.damageTakenFloor = false; p.damageTakenBoss = false; p.mapRevealed = false;
     p.buffs = p.buffs.filter((b) => b.until !== 'floor' && b.until !== 'room');
     p.refresh();
     if (S.view) { clearEntities(); S.view.dispose(); S.view = null; }
@@ -281,6 +283,10 @@ export class Game {
       case 'dead':
         if (S.player) S.player.sync();
         updateFx(dt);
+        break;
+      case 'cutscene':
+        updateFx(dt);
+        for (const m of S.misc) if (m.alive && m.update && !m.solid) m.update(dt);
         break;
       default: break;
     }
@@ -576,6 +582,7 @@ export class Game {
   cardName(id) { return CARDS[id]?.name || 'a card'; }
   pillName(id) { return S.run.pillsKnown.has(id) ? PILLS[id]?.name : '???'; }
   onPickup() {}
+  spawnBlueFly(x, z) { spawnBlueFly(S.player); }
 
   enterTrapdoor(td) {
     if (this.state !== 'play' || this.descending) return;
@@ -597,7 +604,7 @@ export class Game {
   // ===========================================================================
   banner(title, sub) { this.ui.itemBanner(title, sub); }
   pause() { if (this.state !== 'play') return; this.state = 'paused'; this.ui.showPause(); }
-  resume() { this.state = 'play'; input.update(); }
+  resume() { this.state = 'play'; input.queue.clear(); input.justPressed.clear(); }
   onPlayerDeath(cause) {
     this.state = 'dead';
     this.stateT = 0;

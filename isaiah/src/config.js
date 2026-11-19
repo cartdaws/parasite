@@ -218,3 +218,9 @@ export const FLOORS = [
     drone: [36.7, 55],
   },
 ];
+
+// Tear tints (hex) used by items and status effects
+export const TEAR_COLORS = {
+  default: 0xb4dcf6, enemy: 0xd23a2a, poison: 0x7ad04a, burn: 0xff9a3a, slow: 0x9a9aa8, fear: 0x8a3aa0,
+  charm: 0xff88cc, homing: 0xc87aff, blood: 0xc82020, holy: 0xfff2b0, bile: 0xd8c840, dark: 0x4a2a4a,
+};

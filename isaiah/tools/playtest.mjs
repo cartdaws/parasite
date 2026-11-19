@@ -34,8 +34,9 @@ async function fight(ms) {
   while (Date.now() < end) {
     const a = await evalg(() => {
       const p = __S.player; if (!p || __game.state !== 'play') return null;
+      if (!__S.enemies.some((e) => e.alive)) return { done: true };
       const es = __S.enemies.filter((e) => e.alive && !e.untargetable);
-      if (!es.length) return { done: true };
+      if (!es.length) return { keys: [['KeyW', 'KeyA', 'KeyS', 'KeyD'][Math.floor(Math.random() * 4)]] };
       es.sort((a, b) => Math.hypot(a.x - p.x, a.z - p.z) - Math.hypot(b.x - p.x, b.z - p.z));
       const e = es[0]; const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz);
       const keys = [];
@@ -50,7 +51,48 @@ async function fight(ms) {
     await hold(a.keys, 110);
   }
 }
+async function startRun(seed = 'TEST 0001', ch) {
+  await page.keyboard.press('Enter');
+  await wait(200);
+  await page.fill('input', seed);
+  await page.keyboard.press('Enter');
+  await wait(1000);
+  // skip intro panels if they show
+  for (let i = 0; i < 6; i++) { const on = await evalg(() => document.getElementById('panels').classList.contains('active')); if (!on) break; await page.keyboard.press('Escape'); await wait(300); }
+  await wait(500);
+}
 const scenarios = {
+  async gallery() {
+    await startRun();
+    // all enemies frozen in the start room
+    await evalg(() => {
+      const types = Object.keys(window.__DEFS).filter((t) => !t.startsWith('boss_') && !t.startsWith('hm_'));
+      types.forEach((t, i) => { const e = window.__spawnEnemy(t, 1 + (i % 9) * 1.4, 1 + Math.floor(i / 9) * 1.7); if (e) { e.status.freeze = 999; e.untargetable = true; } });
+      __S.player.x = 12; __S.player.z = 6;
+    });
+    await wait(400); await shot('g-enemies');
+    await evalg(() => { for (const e of __S.enemies) e.destroy(); __S.enemies.length = 0; });
+    await evalg(() => { const ids = Object.keys(window.__ITEMS); ids.slice(0, 48).forEach((id, i) => window.__spawnPickup('pedestal', 0.8 + (i % 12) * 1.05, 0.8 + Math.floor(i / 12) * 1.6, { itemId: id })); __S.player.x = 6.5; __S.player.z = 6.6; });
+    await wait(400); await shot('g-items1');
+    await evalg(() => { for (const p of __S.pickups) p.destroy(); __S.pickups.length = 0; const ids = Object.keys(window.__ITEMS); ids.slice(48).forEach((id, i) => window.__spawnPickup('pedestal', 0.8 + (i % 12) * 1.05, 0.8 + Math.floor(i / 12) * 1.6, { itemId: id })); });
+    await wait(400); await shot('g-items2');
+  },
+  async boss() {
+    await startRun(process.argv[4] || 'TEST 0001');
+    const which = process.argv[5];
+    const items = (process.argv[6] || '').split(',').filter(Boolean);
+    await evalg(([which, items]) => {
+      const p = __S.player; for (const id of items) __game.giveItem(p, id);
+      p.maxRed = 12; p.red = 12;
+      const r = __S.floor.rooms.find((r) => r.type === 'boss');
+      if (which) { r.boss = which; const c = r.contents && r.contents.find((c) => c.kind === 'boss'); if (c) c.id = which; }
+      __game.transitionTo(r, r.doors[0], 'fade');
+    }, [which, items]);
+    await wait(700); await shot('b-intro');
+    await wait(2200);
+    if (process.env.HMLOW) { await evalg(() => { const m = __S.enemies.find((e) => e.type === 'boss_housemother'); m.hp = m.maxHp * 0.025; }); await fight(4000); await shot('hm-phase2'); await evalg(() => { const h = __S.enemies.find((e) => e.type === 'hm_heart'); if (h) h.hp = 30; }); await fight(8000); await wait(3500); await shot('hm-win-panel'); for (let k = 0; k < 4; k++) { await page.keyboard.press('Enter'); await wait(500); } await shot('hm-win'); return; }
+    for (let i = 0; i < 6; i++) { await fight(5000); await shot('b-' + i); const st = await evalg(() => ({ state: __game.state, hp: __S.player.red, boss: __S.enemies.filter((e) => e.isBoss && e.alive).map((e) => e.type + ':' + Math.round(e.hp) + ':' + e.state + ':' + e.t.toFixed(1) + ':' + e.x.toFixed(1) + ',' + e.z.toFixed(1)) })); console.log(JSON.stringify(st)); if (st.state !== 'play' || !st.boss.length) break; }
+  },
   async rooms() {
     await page.keyboard.press('Enter');
     await wait(200);

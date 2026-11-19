@@ -1,5 +1,5 @@
 // Tears (player projectiles), enemy shots, and lasers.
-import { CFG } from '../config.js';
+import { CFG, TEAR_COLORS } from '../config.js';
 import { S } from '../state.js';
 import { makeSprite, freeSprite, place, makeShadow, freeFlat, placeFlat, COS_T, setTex } from '../render/gfx.js';
 import { tearTex } from '../render/art_world.js';
@@ -10,10 +10,7 @@ import { runHook } from '../items/hooks.js';
 import { audio } from '../core/audio.js';
 import * as THREE from 'three';
 
-export const TEAR_COLORS = {
-  default: 0xb4dcf6, enemy: 0xd23a2a, poison: 0x7ad04a, burn: 0xff9a3a, slow: 0x9a9aa8, fear: 0x8a3aa0,
-  charm: 0xff88cc, homing: 0xc87aff, blood: 0xc82020, holy: 0xfff2b0, bile: 0xd8c840, dark: 0x4a2a4a,
-};
+export { TEAR_COLORS };
 
 let tearId = 0;
 export class Tear {

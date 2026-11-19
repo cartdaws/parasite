@@ -25,7 +25,7 @@ export function recalcStats(p) {
   const a = { dmg: 0, dmgFlat: 0, dmgMult: 1, tears: 0, tearsFlat: 0, tearsMult: 1, range: 0, shotSpeed: 0, speed: 0, luck: 0 };
   const flags = {};
   let tearColor = null, tearScale = 1, weapon = 'tears', shots = 1, spreadMode = 'fan', tearStyle = 'round';
-  let flying = false;
+  let flying = false, size = 1;
   for (const src of statSources(p)) {
     const s = src.stats;
     if (s) for (const k in s) {
@@ -41,6 +41,7 @@ export function recalcStats(p) {
     if (src.extraShots) shots += src.extraShots;
     if (src.spread) spreadMode = src.spread;
     if (src.flight) flying = true;
+    if (src.size) size *= src.size;
   }
   if (flags.flight) flying = true;
   let damage = base.damage * Math.sqrt(Math.max(0.04, 1 + 1.2 * a.dmg)) + a.dmgFlat;
@@ -70,4 +71,6 @@ export function recalcStats(p) {
   p.shots = Math.min(8, shots);
   p.spreadMode = spreadMode;
   p.flying = flying;
+  p.sizeMult = size;
+  p.r = CFG.PLAYER.radius * size;
 }
