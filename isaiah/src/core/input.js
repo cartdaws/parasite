@@ -1,4 +1,5 @@
 // Keyboard + gamepad input. Polled once per fixed tick via update().
+import { touch } from './touch.js';
 // move: {x, z} analog vector; shootDir: 0 up, 1 right, 2 down, 3 left, -1 none.
 
 const BIND = {
@@ -94,6 +95,13 @@ class Input {
       if (b.some((x, i) => x && !this.padPrev[i])) { this.anyKey = true; this.usingPad = true; }
       this.padPrev = b;
       this.padHeldRestart = b[8] && b[9];
+    }
+
+    // touch sticks / buttons
+    if (touch.active) {
+      if (touch.move.x || touch.move.z) { mx = touch.move.x; mz = touch.move.z; }
+      if (touch.shootDir >= 0) sd = touch.shootDir;
+      if (touch.pressed.size) { for (const a of touch.pressed) this.justPressed.add(a); touch.pressed.clear(); this.anyKey = true; }
     }
 
     const len = Math.hypot(mx, mz);

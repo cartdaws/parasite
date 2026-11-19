@@ -13,6 +13,7 @@ import { itemIconTex } from '../render/art_items.js';
 import { ITEMS } from '../items/items.js';
 import { gfx } from '../render/gfx.js';
 import { playPanels } from './panels.js';
+import { goFullscreenLandscape, touch } from '../core/touch.js';
 
 export class UI {
   constructor(hud, root) {
@@ -90,7 +91,8 @@ export class UI {
     info.textContent = `runs ${b.runs} · deepest floor ${b.floor} · wins ${b.wins}`;
     d.appendChild(info);
     const help = document.createElement('div'); help.className = 'small dim';
-    help.textContent = 'WASD move · Arrows cry · E bomb · Q card/pill · Space item · Tab map · Esc pause · hold R restart';
+    help.textContent = touch.active ? 'left thumb moves · right thumb cries · buttons for bomb, item and card · play sideways'
+      : 'WASD move · Arrows cry · E bomb · Q card/pill · Space item · Tab map · Esc pause · hold R restart';
     d.appendChild(help);
     this.focusIdx = 0; this.updateFocus();
   }
@@ -153,6 +155,7 @@ export class UI {
   }
 
   startRun(seed, charId) {
+    goFullscreenLandscape();
     this.clear();
     audio.unlock();
     applySettings();

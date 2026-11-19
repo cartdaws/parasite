@@ -28,6 +28,8 @@ npm run build      # static build in dist/
 | Pause | Esc / P | Start |
 | Restart run | hold R | hold Back+Start |
 
+**Phones / tablets:** play in landscape. Left thumb anywhere on the left half is a floating move stick; right thumb on the right half cries (snaps to 4 directions). Buttons on the right: bomb, active item, card/pill; top: pause and map. Starting a run tries to go fullscreen and lock landscape where the browser allows it.
+
 ## What's in it
 - **Floors**: 13×13 cell grid grown breadth-first from the center (`3.33 × floor + 5–6` rooms), dead ends become Boss / Treasure / Shop rooms, plus optional Sacrifice, Challenge, Arcade and Library rooms and a hidden Secret room (bomb the wall; some walls show a tinted crack). 1×1, 1×2, 2×1, 2×2 and L-shaped rooms. 47 hand-authored 13×7 ASCII templates (`src/world/templates.js`), mirrored for variety.
 - **Doors** lock when you enter a room with enemies and slam open when it's clear; clears can drop a luck-weighted reward. Shops/libraries need a key, arcades a coin.

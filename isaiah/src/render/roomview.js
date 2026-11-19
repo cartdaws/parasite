@@ -6,6 +6,7 @@ import { gfx, makeSprite, freeSprite, freeFlat, place } from './gfx.js';
 import { paintFloor, wallFaceTex, wallTopTex, rockTex, metalTex, poopTex, fireplaceTex, tntTex, urnTex, doorTex, stampSplat, stampScorch, TILE_PX } from './art_world.js';
 import { toTexture, inkText, rgba } from './draw.js';
 import { RNG, fxRng } from '../core/rng.js';
+import { touch } from '../core/touch.js';
 
 const WH = CFG.WALL_HEIGHT;
 
@@ -47,7 +48,7 @@ export class RoomView {
   buildFloor() {
     const r = this.room;
     this.floorCanvas = paintFloor(r, this.palette, r.seed || r.id + 1);
-    if (r.type === 'start' && this.floorNum === 1 && !r.noHints) this.drawControlHints();
+    if (r.type === 'start' && this.floorNum === 1 && !r.noHints && !touch.active) this.drawControlHints();
     if (r.decalLog) for (const d of r.decalLog) this.applyDecal(d); // replay persistent decals
     this.floorCtx = this.floorCanvas.getContext('2d');
     this.floorTex = toTexture(this.floorCanvas);

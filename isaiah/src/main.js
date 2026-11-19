@@ -8,7 +8,12 @@ import { HUD } from './ui/hud.js';
 import { UI, applySettings } from './ui/menus.js';
 import { S } from './state.js';
 import { CFG } from './config.js';
-import { setIconFn } from './items/items.js';
+import { initTouch, setTouchVisible } from './core/touch.js';
+import { setIconFn, ITEMS } from './items/items.js';
+import { DEFS, spawnEnemy } from './entities/enemies.js';
+import { spawnPickup } from './entities/pickups.js';
+import * as logicMod from './items/logic.js';
+import * as consMod from './items/consumables.js';
 import { itemIconTex } from './render/art_items.js';
 setIconFn(itemIconTex);
 
@@ -18,21 +23,21 @@ const hud = new HUD(document.getElementById('hud'));
 const ui = new UI(hud, document.getElementById('ui'));
 const game = new Game(ui);
 applySettings();
+initTouch();
 window.addEventListener('pointerdown', () => audio.unlock());
 window.addEventListener('keydown', () => audio.unlock());
 
 startLoop(
   (dt) => game.update(dt),
-  (dt) => { game.render(dt); renderFrame(dt); hud.draw(dt); },
+  (dt) => {
+    game.render(dt); renderFrame(dt); hud.draw(dt);
+    setTouchVisible(['play', 'transition', 'bossintro', 'cutscene'].includes(game.state) && !ui.screen);
+  },
   CFG.TICK,
 );
 ui.showTitle();
 // debugging / automated playtests
 window.__S = S;
-import('./entities/enemies.js').then((m) => { window.__DEFS = m.DEFS; window.__spawnEnemy = m.spawnEnemy; });
-import('./entities/pickups.js').then((m) => { window.__spawnPickup = m.spawnPickup; });
-import('./items/items.js').then((m) => { window.__ITEMS = m.ITEMS; });
-import('./items/logic.js').then((m) => { window.__logic = m; });
-import('./items/consumables.js').then((m) => { window.__cons = m; });
+Object.assign(window, { __DEFS: DEFS, __spawnEnemy: spawnEnemy, __spawnPickup: spawnPickup, __ITEMS: ITEMS, __logic: logicMod, __cons: consMod });
 window.__game = game;
 window.__ui = ui;
