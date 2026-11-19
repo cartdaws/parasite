@@ -4,13 +4,14 @@ html, body { touch-action: none; -webkit-touch-callout: none; -webkit-tap-highli
   font-family: "Patrick Hand", "Comic Neue", "Comic Sans MS", "Chalkboard SE", "Marker Felt", "Segoe Print", cursive; user-select: none; }
 canvas#gl, canvas#hud { position: fixed; inset: 0; display: block; }
 canvas#hud { pointer-events: none; }
-#ui { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5,3,4,0.72); }
+#ui { position: fixed; inset: 0; display: none; background: rgba(5,3,4,0.72); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
 #ui.active { display: flex; }
 #panels { position: fixed; inset: 0; display: none; background: #050304; align-items: center; justify-content: center; flex-direction: column; }
 #panels.active { display: flex; }
-#panels canvas { max-width: 96vw; max-height: 80vh; }
+#panels canvas { max-width: 96vw; max-height: 80vh; max-height: 80dvh; object-fit: contain; }
 #panels .hint { margin-top: 10px; opacity: 0.6; font-size: 18px; }
-.menu { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 28px; max-width: 96vw; max-height: 96vh; overflow: auto; }
+.menu { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 16px; margin: auto; max-width: 100%; box-sizing: border-box; }
 .menu.title { background: none; }
 .menu h2 { margin: 0 0 4px; font-size: 40px; color: var(--paper); text-shadow: 3px 3px 0 var(--ink), -2px -2px 0 var(--ink), 2px -2px 0 var(--ink), -2px 2px 0 var(--ink); transform: rotate(-1deg); }
 .title-art { width: min(760px, 94vw); height: auto; }
@@ -52,31 +53,54 @@ canvas#hud { pointer-events: none; }
 .touch-hint { position: fixed; bottom: 22%; font-size: 20px; color: rgba(232,220,192,0.35); pointer-events: none; }
 .touch-hint.left { left: 18%; } .touch-hint.right { right: 26%; }
 .touch-layer.used-left .touch-hint.left, .touch-layer.used-right .touch-hint.right { display: none; }
-.touch-btns { position: fixed; right: max(14px, env(safe-area-inset-right)); top: 32%; display: flex; flex-direction: column; gap: 12px; }
+.touch-btns { position: fixed; right: max(14px, env(safe-area-inset-right, 0px)); top: 30%; display: flex; flex-direction: column; gap: 12px; }
 .tbtn { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;
   background: rgba(42,28,22,0.6); border: 3px solid rgba(27,18,14,0.9); color: var(--paper); box-shadow: 2px 3px 0 rgba(0,0,0,0.5); }
 .tbtn.down { background: rgba(106,32,24,0.85); transform: scale(0.94); }
 .tbtn.small { width: 52px; height: 36px; border-radius: 10px; font-size: 16px; }
 .touch-top { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
-/* phones: play sideways */
-.rotate-hint { display: none; }
-@media (orientation: portrait) and (pointer: coarse) {
-  .rotate-hint { display: flex; position: fixed; inset: 0; z-index: 20; background: #050304; color: var(--paper); align-items: center; justify-content: center;
-    flex-direction: column; font-size: 26px; text-align: center; padding: 30px; gap: 16px; }
-  .rotate-hint .ph { width: 70px; height: 110px; border: 5px solid var(--paper); border-radius: 12px; animation: rot 2s ease-in-out infinite; }
-}
-@keyframes rot { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
-/* short landscape screens */
-@media (max-height: 500px) {
-  .menu { gap: 6px; padding: 8px 14px; }
-  .menu h2 { font-size: 28px; }
-  .title-art { width: auto; max-height: 42vh; }
-  .btn { font-size: 19px; padding: 4px 16px; }
-  .small { font-size: 14px; }
-  .charcard { width: 150px; padding: 6px; }
-  .charcard canvas { width: 90px; height: 90px; }
-  .note { max-height: 62vh; width: auto; }
+/* ---- responsive menus: the menu scrolls if it ever overflows; split screens sit side by side when wide ---- */
+.split { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 28px; max-width: 100%; }
+.side { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.title-art { width: min(760px, 94vw); max-height: 46vh; max-height: 46dvh; object-fit: contain; }
+.charcard canvas { width: 120px; height: 120px; }
+.small { max-width: 92vw; }
+/* short screens (phones in landscape, small windows) */
+@media (max-height: 560px) {
+  .menu { gap: 8px; padding: 10px 14px; }
+  .menu h2 { font-size: 26px; }
+  .split { flex-wrap: nowrap; }
+  .title-art { width: min(48vw, 520px); max-height: 80vh; max-height: 80dvh; }
+  .btn { font-size: 19px; padding: 5px 16px; }
+  .small { font-size: 14px; max-width: 44vw; }
+  .row { gap: 10px; flex-wrap: nowrap; }
+  .charcard { width: 132px; padding: 6px; gap: 2px; }
+  .charcard canvas { width: 72px; height: 72px; }
+  .cname { font-size: 20px; }
+  .charcard .small { font-size: 12px; max-width: none; }
+  .seedrow { font-size: 18px; }
+  .seedrow input { font-size: 18px; width: 130px; padding: 2px 8px; }
+  .optrow { font-size: 18px; width: 300px; }
+  .note { width: min(420px, 70vw); max-height: 70vh; max-height: 70dvh; object-fit: contain; }
   .items { max-width: 80vw; }
-  .col { min-width: 200px; }
+  .item, .item canvas { width: 36px; height: 36px; }
+  .col { min-width: 190px; gap: 6px; }
   .col.row2 { gap: 6px; }
+}
+/* narrow screens (phones held upright) */
+@media (max-width: 560px) {
+  .menu h2 { font-size: 30px; }
+  .split { flex-direction: column; flex-wrap: nowrap; }
+  .title-art { width: 94vw; max-height: 34vh; max-height: 34dvh; }
+  .small { max-width: 92vw; }
+  .row { gap: 10px; }
+  .charcard { width: 42vw; }
+  .optrow { width: 90vw; }
+  .note { width: 92vw; }
+  .col { min-width: min(240px, 80vw); }
+}
+/* portrait touch: controls live below the room */
+@media (orientation: portrait) {
+  .touch-btns { top: auto; bottom: max(14px, env(safe-area-inset-bottom, 0px)); right: 50%; transform: translateX(50%); flex-direction: row; gap: 18px; }
+  .touch-hint { bottom: 26%; }
 }

@@ -28,6 +28,8 @@ export function initGfx(canvas) {
   gfx.camera = new THREE.OrthographicCamera(-8, 8, 5, -5, 0.1, 200);
   resize();
   window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', () => setTimeout(resize, 150));
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
   return gfx;
 }
 
@@ -38,11 +40,16 @@ function resize() {
   gfx.renderer.domElement.style.width = w + 'px';
   gfx.renderer.domElement.style.height = h + 'px';
   const aspect = w / h;
-  let vw = CFG.VIEW_MIN_W, vh = CFG.VIEW_MIN_H;
+  // portrait (phones held upright): fit the room to the width and park it near
+  // the top, leaving the lower part of the screen free for the thumbs
+  const portrait = aspect < 0.9;
+  gfx.portrait = portrait;
+  let vw = portrait ? 15.4 : CFG.VIEW_MIN_W, vh = CFG.VIEW_MIN_H;
   if (vw / vh > aspect) vh = vw / aspect; else vw = vh * aspect;
   gfx.viewW = vw; gfx.viewH = vh;
   const c = gfx.camera;
-  c.left = -vw / 2; c.right = vw / 2; c.top = vh / 2; c.bottom = -vh / 2;
+  const topFrac = portrait ? Math.max(0.3, Math.min(0.5, (CFG.VIEW_MIN_H * 0.5 + 2.6) / vh)) : 0.5;
+  c.left = -vw / 2; c.right = vw / 2; c.top = vh * topFrac; c.bottom = -vh * (1 - topFrac);
   c.updateProjectionMatrix();
   if (gfx.onResize) gfx.onResize(w, h);
 }

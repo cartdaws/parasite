@@ -8,7 +8,7 @@ import { HUD } from './ui/hud.js';
 import { UI, applySettings } from './ui/menus.js';
 import { S } from './state.js';
 import { CFG } from './config.js';
-import { initTouch, setTouchVisible } from './core/touch.js';
+import { initTouch, setTouchVisible, touch } from './core/touch.js';
 import { setIconFn, ITEMS } from './items/items.js';
 import { DEFS, spawnEnemy } from './entities/enemies.js';
 import { spawnPickup } from './entities/pickups.js';
@@ -24,14 +24,14 @@ const ui = new UI(hud, document.getElementById('ui'));
 const game = new Game(ui);
 applySettings();
 initTouch();
-window.addEventListener('pointerdown', () => audio.unlock());
+window.addEventListener('pointerdown', () => { audio.unlock(); if (game.state === 'bossintro') touch.pressed.add('confirm'); });
 window.addEventListener('keydown', () => audio.unlock());
 
 startLoop(
   (dt) => game.update(dt),
   (dt) => {
     game.render(dt); renderFrame(dt); hud.draw(dt);
-    setTouchVisible(['play', 'transition', 'bossintro', 'cutscene'].includes(game.state) && !ui.screen);
+    setTouchVisible(['play', 'transition', 'cutscene'].includes(game.state) && !ui.screen);
   },
   CFG.TICK,
 );

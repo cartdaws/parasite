@@ -78,22 +78,26 @@ export class UI {
     const d = this.panel('title');
     this.screen = 'title';
     this.onBack = null;
+    const split = document.createElement('div'); split.className = 'split';
+    d.appendChild(split);
     const art = titleArt();
     art.className = 'title-art';
-    d.appendChild(art);
+    split.appendChild(art);
+    const side = document.createElement('div'); side.className = 'side';
+    split.appendChild(side);
     const col = document.createElement('div'); col.className = 'col';
-    d.appendChild(col);
+    side.appendChild(col);
     this.button(col, 'New Run', () => this.showCharSelect());
     this.button(col, 'Options', () => this.showOptions(() => this.showTitle()));
     this.button(col, 'Watch the Beginning', () => this.playIntro(() => this.showTitle()));
     const b = save.data.best;
     const info = document.createElement('div'); info.className = 'small';
     info.textContent = `runs ${b.runs} · deepest floor ${b.floor} · wins ${b.wins}`;
-    d.appendChild(info);
+    side.appendChild(info);
     const help = document.createElement('div'); help.className = 'small dim';
-    help.textContent = touch.active ? 'left thumb moves · right thumb cries · buttons for bomb, item and card · play sideways'
+    help.textContent = touch.active ? 'left thumb moves · right thumb cries · buttons for bomb, item and card'
       : 'WASD move · Arrows cry · E bomb · Q card/pill · Space item · Tab map · Esc pause · hold R restart';
-    d.appendChild(help);
+    side.appendChild(help);
     this.focusIdx = 0; this.updateFocus();
   }
 
@@ -102,8 +106,12 @@ export class UI {
     this.screen = 'chars';
     this.onBack = () => this.showTitle();
     const h = document.createElement('h2'); h.textContent = 'Who goes down?'; d.appendChild(h);
+    const split = document.createElement('div'); split.className = 'split';
+    d.appendChild(split);
     const row = document.createElement('div'); row.className = 'row';
-    d.appendChild(row);
+    split.appendChild(row);
+    const side = document.createElement('div'); side.className = 'side';
+    split.appendChild(side);
     const chars = [['isaiah', true], ['june', save.data.unlocks.june]];
     const cards = [];
     for (const [id, unlocked] of chars) {
@@ -126,7 +134,6 @@ export class UI {
     const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = 'random'; inp.maxLength = 9; inp.spellcheck = false;
     inp.addEventListener('keydown', (e) => { if (e.code === 'Enter') { e.preventDefault(); go(); } });
     seedRow.append(lab, inp);
-    d.appendChild(seedRow);
     const go = () => {
       const seed = inp.value.trim() ? normalizeSeed(inp.value) : randomSeedString();
       if (!save.data.seenIntro && save.data.settings.showIntro) {
@@ -135,8 +142,9 @@ export class UI {
       } else this.startRun(seed, this.charId);
     };
     const col = document.createElement('div'); col.className = 'col';
-    d.appendChild(col);
+    side.appendChild(col);
     this.button(col, 'Go Down', go);
+    side.appendChild(seedRow);
     this.button(col, 'Back', () => this.showTitle());
     // left/right switches character
     this.onCharKey = (e) => {
@@ -196,6 +204,10 @@ export class UI {
     const h = document.createElement('h2'); h.textContent = 'Paused'; d.appendChild(h);
     const seed = document.createElement('div'); seed.className = 'seed'; seed.textContent = 'Seed: ' + S.run.seed; d.appendChild(seed);
     const fl = document.createElement('div'); fl.className = 'small'; fl.textContent = CFG.FLOOR_NAMES[S.floorNum - 1] + (S.run.curse ? ' — ' + S.run.curse : ''); d.appendChild(fl);
+    const st = S.player.stats;
+    const stl = document.createElement('div'); stl.className = 'small';
+    stl.textContent = `speed ${st.speed.toFixed(2)} · tears ${st.tears.toFixed(2)} · damage ${st.damage.toFixed(2)} · range ${st.range.toFixed(2)} · shot speed ${st.shotSpeed.toFixed(2)} · luck ${st.luck.toFixed(0)}`;
+    d.appendChild(stl);
     d.appendChild(itemGrid(S.player));
     const col = document.createElement('div'); col.className = 'col';
     d.appendChild(col);

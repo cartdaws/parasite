@@ -25,6 +25,8 @@ export class HUD {
     this.intro = null;
     this.resize();
     window.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 150));
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', () => this.resize());
   }
   resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -33,8 +35,15 @@ export class HUD {
     this.c.style.width = window.innerWidth + 'px';
     this.c.style.height = window.innerHeight + 'px';
     this.dpr = dpr;
-    this.scale = Math.min(window.innerWidth / VW0, window.innerHeight / VH0) * dpr;
-    this.VW = this.c.width / this.scale; this.VH = this.c.height / this.scale;
+    const w = window.innerWidth, h = window.innerHeight;
+    this.portrait = w / h < 0.9;
+    this.scale = (this.portrait ? Math.min(w / VH0, h / VW0) : Math.min(w / VW0, h / VH0)) * dpr;
+    // safe-area insets (notches, home indicator) in virtual HUD units
+    if (!this.probe) { this.probe = document.createElement('div'); this.probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)'; document.body.appendChild(this.probe); }
+    const cs = getComputedStyle(this.probe), k = dpr / this.scale;
+    this.inset = { t: parseFloat(cs.paddingTop) * k || 0, r: parseFloat(cs.paddingRight) * k || 0, b: parseFloat(cs.paddingBottom) * k || 0, l: parseFloat(cs.paddingLeft) * k || 0 };
+    this.FW = this.c.width / this.scale; this.FH = this.c.height / this.scale;
+    this.VW = this.FW - this.inset.l - this.inset.r; this.VH = this.FH - this.inset.t - this.inset.b;
   }
 
   itemBanner(title, sub) {
@@ -51,12 +60,12 @@ export class HUD {
     ctx.clearRect(0, 0, this.c.width, this.c.height);
     if (!S.run || !S.player) return;
     this.drawVignette(ctx, dt);
-    ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    ctx.setTransform(this.scale, 0, 0, this.scale, this.inset.l * this.scale, this.inset.t * this.scale);
     const p = S.player;
     if (S.game.state !== 'title') {
       this.drawHearts(ctx, p);
       this.drawCounts(ctx, p);
-      this.drawStats(ctx, p);
+      if (!this.portrait) this.drawStats(ctx, p);
       if (S.run.curse !== 'lost') this.drawMinimap(ctx);
       else inkText(ctx, '?', this.VW - 60, 60, 40, '#8a7a6a', { align: 'center' });
       this.drawSlots(ctx, p);
@@ -65,13 +74,14 @@ export class HUD {
       if (this.mapOpen) this.drawBigMap(ctx);
       if (S.game.restartHold > 0) this.drawRestartHold(ctx, S.game.restartHold);
     }
+    ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
     if (this.intro) this.drawBossIntro(ctx, dt);
     // fade overlay
     if (this.fadeDur > 0) {
       this.fadeT += dt;
       const k = this.fadeT / this.fadeDur;
       const a = k < 0.5 ? k * 2 : Math.max(0, 2 - k * 2);
-      ctx.fillStyle = `rgba(0,0,0,${a})`; ctx.fillRect(0, 0, this.VW, this.VH);
+      ctx.fillStyle = `rgba(0,0,0,${a})`; ctx.fillRect(0, 0, this.FW, this.FH);
       if (k >= 1) this.fadeDur = 0;
     }
   }
@@ -86,8 +96,10 @@ export class HUD {
     const candle = p.hasItem('candle_stub');
     const dark = S.run.curse === 'darkness' && !candle;
     // room-edge darkness (always on, stronger on deeper floors)
-    const cx = w / 2, cy = h / 2;
-    const g = ctx.createRadialGradient(cx, cy, Math.min(w, h) * 0.35, cx, cy, Math.max(w, h) * 0.62);
+    const rc = worldToScreen(S.room.originX + S.room.W / 2, 0, S.room.originZ + S.room.H / 2);
+    const cx = S.room.cells.length > 1 ? w / 2 : rc.x * this.dpr, cy = S.room.cells.length > 1 ? h / 2 : rc.y * this.dpr;
+    const rr = this.portrait ? w * 0.5 : Math.min(w, h) * 0.35;
+    const g = ctx.createRadialGradient(cx, cy, rr, cx, cy, this.portrait ? w * 0.95 : Math.max(w, h) * 0.62);
     g.addColorStop(0, 'rgba(0,0,0,0)');
     g.addColorStop(1, `rgba(0,0,0,${0.55 + fl * 0.06})`);
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
@@ -229,7 +241,7 @@ export class HUD {
     }
     if (p.charge > 0 && p.weapon !== 'tears') { // charge meter above the player
       const sp = worldToScreen(S.room.originX + p.x + 0.55, 1.4, S.room.originZ + p.z);
-      const x = sp.x * this.dpr / this.scale, y = sp.y * this.dpr / this.scale;
+      const x = sp.x * this.dpr / this.scale - this.inset.l, y = sp.y * this.dpr / this.scale - this.inset.t;
       ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x, y - 24, 7, 26);
       ctx.fillStyle = p.charge >= 1 ? '#ff4040' : '#e8dcc0'; ctx.fillRect(x + 1, y + 1 - 24 * p.charge, 5, 24 * p.charge);
     }
@@ -241,7 +253,9 @@ export class HUD {
     for (const e of S.enemies) if (e.isBoss && e.alive && !e.noBar) { hp += Math.max(0, e.hp); max += e.maxHp; }
     if (S.bossBarMax && hp > 0) max = Math.max(max, S.bossBarMax);
     if (max <= 0 || hp <= 0) return;
-    const w = 300, h = 16, x = this.VW / 2 - w / 2, y = this.VH - 34;
+    const w = Math.min(300, this.VW - 80), h = 16, x = this.VW / 2 - w / 2;
+    let y = this.VH - 34;
+    if (this.portrait) { const sp = worldToScreen(S.room.originX + S.room.W / 2, 0, S.room.originZ + S.room.H + 1.2); y = sp.y * this.dpr / this.scale - this.inset.t + 8; }
     ctx.fillStyle = 'rgba(0,0,0,0.65)'; roundRect(ctx, x - 4, y - 4, w + 8, h + 8, 6); ctx.fill();
     ctx.fillStyle = '#3a0a0a'; ctx.fillRect(x, y, w, h);
     ctx.fillStyle = '#c81e1e'; ctx.fillRect(x, y, w * (hp / max), h);
@@ -290,7 +304,7 @@ export class HUD {
   drawBossIntro(ctx, dt) {
     const it = this.intro;
     it.t += dt;
-    const W = this.VW, H = this.VH;
+    const W = this.FW, H = this.FH;
     const slide = Math.min(1, it.t / 0.25);
     const ease = 1 - Math.pow(1 - slide, 3);
     ctx.save();
@@ -305,12 +319,13 @@ export class HUD {
     for (let i = 0; i < 40; i++) { ctx.strokeStyle = i % 2 ? '#000' : '#fff'; ctx.lineWidth = 2; ctx.beginPath(); const yy = (i / 40) * H; ctx.moveTo(0, yy); ctx.lineTo(W, yy + 30); ctx.stroke(); }
     ctx.globalAlpha = 1;
     const pp = portraitTex(S.player.charId).image;
-    const ps = Math.min(H * 0.62, 320);
+    const ps = Math.min(H * 0.62, W * 0.44, 320);
+    const fs = Math.min(40, W / 13);
     ctx.drawImage(pp, W * 0.25 - ps / 2 - (1 - ease) * 300, H * 0.18, ps, ps);
     const info = BOSS_INFO[it.id];
     if (info && info.portrait) { const bp = info.portrait().image; ctx.drawImage(bp, W * 0.75 - ps / 2 + (1 - ease) * 300, H * 0.14, ps, ps); }
-    inkText(ctx, S.player.charId === 'june' ? 'JUNE' : 'ISAIAH', W * 0.25, H * 0.86, 40, '#f1e6cc', { align: 'center', lw: 6 });
-    inkText(ctx, (info ? info.name : it.id).toUpperCase(), W * 0.75, H * 0.86, 40, '#ffd0a0', { align: 'center', lw: 6 });
+    inkText(ctx, S.player.charId === 'june' ? 'JUNE' : 'ISAIAH', W * 0.25, H * 0.86, fs, '#f1e6cc', { align: 'center', lw: 6 });
+    inkText(ctx, (info ? info.name : it.id).toUpperCase(), W * 0.75, H * 0.86, fs, '#ffd0a0', { align: 'center', lw: 6 });
     const vs = 1 + Math.max(0, 0.6 - it.t) * 2;
     inkText(ctx, 'VS', W / 2, H * 0.55, 70 * vs, '#e8c040', { align: 'center', lw: 8, rot: -0.12 });
     ctx.restore();
