@@ -1,4 +1,5 @@
 // Entry point: boot renderer, HUD, UI and the fixed-timestep loop.
+import { fontsReady } from './fonts.js';
 import { initGfx, renderFrame } from './render/gfx.js';
 import { startLoop } from './core/loop.js';
 import { save } from './core/save.js';
@@ -27,6 +28,8 @@ initTouch();
 window.addEventListener('pointerdown', () => { audio.unlock(); if (game.state === 'bossintro') touch.pressed.add('confirm'); });
 window.addEventListener('keydown', () => audio.unlock());
 
+// canvas art bakes text into textures, so wait for the bundled fonts first
+fontsReady().then(() => {
 startLoop(
   (dt) => game.update(dt),
   (dt) => {
@@ -36,6 +39,7 @@ startLoop(
   CFG.TICK,
 );
 ui.showTitle();
+});
 // debugging / automated playtests
 window.__S = S;
 Object.assign(window, { __DEFS: DEFS, __spawnEnemy: spawnEnemy, __spawnPickup: spawnPickup, __ITEMS: ITEMS, __logic: logicMod, __cons: consMod });

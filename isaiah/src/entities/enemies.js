@@ -306,7 +306,7 @@ export const DEFS = {
     update(e) { e.chase(e.speed); } },
   sprinter: { name: 'a sprinter', r: 0.34, mass: 1, fps: 10,
     update(e) { e.chase(e.speed * (e.distToPlayer() < 3 ? 1.25 : 1)); } },
-  tusk: { name: 'a tusk', r: 0.42, mass: 2.2, gore: 1.1,
+  tusk: { name: 'a wild hog', r: 0.42, mass: 2.2, gore: 1.1,
     frame(e) { return e.state === 'charge' ? 2 : Math.floor(e.age * 6) % 2; },
     update(e) {
       if (e.state === 'charge') {
@@ -329,7 +329,7 @@ export const DEFS = {
       if (every(e, 'fireT', e.cfg.fireRate)) { for (let i = 0; i < 4; i++) e.shoot(i * Math.PI / 2, { speed: 4.2 }); e.squashY = 1.25; }
       e.squashY = 1 + ((e.squashY || 1) - 1) * 0.85;
     } },
-  wellspout: { name: 'a wellspout', r: 0.45, mass: 99, stationary: true, gore: 0.9, bloodTint: 0x5a7a7a, decal: '#2a3a3a',
+  wellspout: { name: 'a drain spout', r: 0.45, mass: 99, stationary: true, gore: 0.9, bloodTint: 0x5a7a7a, decal: '#2a3a3a',
     frame(e) { return e.fireT != null && e.fireT < 0.35 ? 1 : 0; },
     update(e) {
       e.stop();
@@ -340,13 +340,13 @@ export const DEFS = {
       wander(e, e.speed, 2);
       if (e.aligned(0.4) >= 0 && every(e, 'shootT', e.cfg.fireRate)) { e.stop(); e.shoot(e.angleToPlayer(), { speed: 5.5 }); }
     } },
-  tick: { name: 'a hopping tick', r: 0.3, mass: 0.8, gore: 0.6,
+  tick: { name: 'a tick', r: 0.3, mass: 0.8, gore: 0.6,
     frame(e) { return e.state === 'air' ? 1 : 0; },
     update(e, dt) { hop(e, dt, { maxDist: 3.2, airTime: 0.45, height: 0.7, rest: 0.35 }); } },
-  toadsack: { name: 'a toad sack', r: 0.55, mass: 3, gore: 1.4,
+  toadsack: { name: 'a bullfrog', r: 0.55, mass: 3, gore: 1.4,
     frame(e) { return e.state === 'air' ? 1 : 0; },
     update(e, dt) { hop(e, dt, { maxDist: 5, airTime: 0.8, height: 2.2, rest: 1.2, onLand: (e) => { e.ring(8, 0, { speed: 4 }); addShake(0.25); audio.play('slam'); } }); } },
-  molemite: { name: 'a mole mite', r: 0.36, mass: 99, stationary: true, gore: 0.8,
+  molemite: { name: 'a gopher', r: 0.36, mass: 99, stationary: true, gore: 0.8,
     frame(e) { return e.state === 'under' ? 0 : e.state === 'emerge' ? 1 : 2; },
     init(e) { e.state = 'under'; e.untargetable = true; e.noContact = true; },
     update(e) {
@@ -370,7 +370,7 @@ export const DEFS = {
         if (e.t > 1.4) { e.state = 'under'; e.t = 0; e.untargetable = true; e.noContact = true; e.shot = false; audio.play('burrow'); }
       }
     } },
-  spider: { name: 'a cellar spider', r: 0.25, mass: 0.5, gore: 0.45, fps: 12,
+  spider: { name: 'a basement spider', r: 0.25, mass: 0.5, gore: 0.45, fps: 12,
     update(e) {
       if (e.t > (e.next ?? 0)) {
         const toward = e.rng.chance(0.6);
@@ -380,7 +380,7 @@ export const DEFS = {
       const go = e.t < e.moveT ? e.speed : 0;
       e.vx = e.dir[0] * go; e.vz = e.dir[1] * go;
     } },
-  broodsp: { name: 'a brood spider', r: 0.45, mass: 1.6, gore: 1.0, fps: 10,
+  broodsp: { name: 'a mama spider', r: 0.45, mass: 1.6, gore: 1.0, fps: 10,
     update(e) {
       if (e.t > (e.next ?? 0)) {
         const a = e.angleToPlayer() + e.rng.range(-0.8, 0.8);
@@ -393,7 +393,7 @@ export const DEFS = {
   clot: { name: 'a clot', r: 0.45, mass: 1.6, gore: 1.0, fps: 4,
     update(e) { e.chase(e.speed); e.squashX = 1 + Math.sin(e.age * 6) * 0.06; e.squashY = 1 - Math.sin(e.age * 6) * 0.06; },
     onDeath(e) { for (let i = 0; i < 2; i++) { const c = spawnEnemy('clotlet', e.x + (i ? 0.35 : -0.35), e.z, { champion: e.champion }); if (c) { c.kx = (i ? 3 : -3); c.spawnGrace = 0.15; } } } },
-  clotlet: { name: 'a clotlet', r: 0.28, mass: 0.8, gore: 0.6, fps: 5,
+  clotlet: { name: 'a little clot', r: 0.28, mass: 0.8, gore: 0.6, fps: 5,
     update(e) { e.chase(e.speed); } },
   gasbag: { name: 'a gasbag', r: 0.45, flying: true, height: 0.35, mass: 1.5, fps: 3, bloodTint: 0x9aa83a, decal: '#5a6a1a',
     update(e) { const a = e.angleToPlayer(); e.vx = Math.cos(a) * e.speed; e.vz = Math.sin(a) * e.speed; e.squashX = e.squashY = 1 + Math.sin(e.age * 4) * 0.05; },
@@ -410,7 +410,7 @@ export const DEFS = {
       if (e.distToPlayer() > 3.5) e.chase(e.speed); else wander(e, e.speed * 0.7, 1);
       if (every(e, 'shootT', e.cfg.fireRate) && S.room.lineClear(e.x, e.z, S.player.x, S.player.z)) { e.stop(); e.shoot(e.angleToPlayer(), { speed: 5 }); }
     } },
-  hive: { name: 'a hive', r: 0.5, mass: 99, stationary: true, gore: 1.0, bloodTint: 0x8a6a3a, decal: '#4a3a1a',
+  hive: { name: 'a hornet nest', r: 0.5, mass: 99, stationary: true, gore: 1.0, bloodTint: 0x8a6a3a, decal: '#4a3a1a',
     update(e) {
       e.stop();
       if (every(e, 'spawnT', e.cfg.spawnRate)) {
@@ -420,7 +420,7 @@ export const DEFS = {
       e.squashY = 1 + ((e.squashY || 1) - 1) * 0.9;
     },
     onDeath(e) { spawnEnemy('gnat', e.x, e.z); } },
-  draft: { name: 'a draft', r: 0.36, flying: true, height: 0.5, mass: 0.8, noGore: true, gore: 0.8,
+  draft: { name: 'a ghost', r: 0.36, flying: true, height: 0.5, mass: 0.8, noGore: true, gore: 0.8,
     init(e) { e.phasing = true; },
     update(e) {
       const a = e.angleToPlayer() + Math.sin(e.age * 1.3) * 0.6;
@@ -430,7 +430,7 @@ export const DEFS = {
       e.opacity = 0.2 + k * 0.75;
       e.untargetable = k < 0.18; e.noContact = k < 0.18;
     } },
-  wailhead: { name: 'a wailing head', r: 0.42, flying: true, height: 0.55, mass: 1.4,
+  wailhead: { name: 'a screaming head', r: 0.42, flying: true, height: 0.55, mass: 1.4,
     frame(e) { return e.fireT != null && e.fireT < 0.4 ? 1 : 0; },
     update(e) {
       const d = e.distToPlayer();
@@ -438,7 +438,7 @@ export const DEFS = {
       e.vx = Math.cos(a) * e.speed; e.vz = Math.sin(a) * e.speed;
       if (every(e, 'fireT', e.cfg.fireRate)) e.spread(e.angleToPlayer(), 3, 0.28, { speed: 4.2 });
     } },
-  grub: { name: 'a grub', r: 0.32, mass: 1, fps: 4, bloodTint: 0xd8c8a8, decal: '#8a7a50',
+  grub: { name: 'a maggot', r: 0.32, mass: 1, fps: 4, bloodTint: 0xd8c8a8, decal: '#8a7a50',
     update(e) { wander(e, e.speed, 2.5); } },
   leech: { name: 'a leech', r: 0.3, mass: 0.8, fps: 10,
     update(e) {
@@ -468,7 +468,7 @@ export const DEFS = {
       const dot = (t.vx / sp) * e.dir[0] + (t.vz / sp) * e.dir[1];
       return dot < -0.5;
     } },
-  bonethrow: { name: 'a bone thrower', r: 0.34, mass: 1, noGore: false, bloodTint: 0xe6dcc4, decal: '#5a5040',
+  bonethrow: { name: 'a skeleton kid', r: 0.34, mass: 1, noGore: false, bloodTint: 0xe6dcc4, decal: '#5a5040',
     frame(e) { return e.throwT != null && e.throwT < 0.3 ? 2 : Math.floor(e.age * 5) % 2; },
     update(e) {
       wander(e, e.speed, 1.8);
@@ -480,14 +480,14 @@ export const DEFS = {
         if (t) t.onLand = (t) => { for (let i = 0; i < 4; i++) enemyShot(e, i * Math.PI / 2 + Math.PI / 4, { x: t.x, z: t.z, speed: 3.2, scale: 0.8, color: 0xe6dcc4, style: 'tooth' }); };
       }
     } },
-  ember: { name: 'an ember', r: 0.3, flying: true, height: 0.45, mass: 0.6, noGore: true, gore: 0.6, fps: 10,
+  ember: { name: 'a fireball', r: 0.3, flying: true, height: 0.45, mass: 0.6, noGore: true, gore: 0.6, fps: 10,
     update(e) {
       const a = e.angleToPlayer() + Math.sin(e.age * 2 + e.uid) * 0.7;
       e.vx = Math.cos(a) * e.speed; e.vz = Math.sin(a) * e.speed;
       if (every(e, 'trailT', 0.6)) creep(e.x, e.z, { color: '#ff7a1a', size: 0.6, life: 1.8 });
     },
     onDeath(e) { for (let i = 0; i < 4; i++) e.shoot(i * Math.PI / 2 + Math.PI / 4, { speed: 4, color: 0xff8a2a }); particles(e.x, e.z, { count: 8, kind: 'spark', color: 0xff9a3a, speed: 3, up: 3, life: 0.5, size: 0.25 }); } },
-  nun: { name: 'a hollow nun', r: 0.4, mass: 2, noGore: false, gore: 1,
+  nun: { name: 'a faceless nun', r: 0.4, mass: 2, noGore: false, gore: 1,
     frame(e) { return e.state === 'cast' ? 1 : 0; },
     update(e) {
       e.stop();
@@ -503,7 +503,7 @@ export const DEFS = {
         if (e.t > 0.4) { e.opacity = 1; e.untargetable = false; e.noContact = false; e.state = 'idle'; e.t = 0; }
       }
     } },
-  nightcrawl: { name: 'a night crawler', r: 0.36, mass: 99, stationary: true,
+  nightcrawl: { name: 'a nightcrawler', r: 0.36, mass: 99, stationary: true,
     frame(e) { return e.state === 'under' ? 0 : e.state === 'rise' ? 1 : 2; },
     init(e) { e.state = 'under'; e.untargetable = true; e.noContact = true; },
     update(e) {
@@ -519,7 +519,7 @@ export const DEFS = {
         if (e.t > 1.3) { e.state = 'under'; e.t = 0; e.untargetable = true; e.noContact = true; }
       }
     } },
-  kilnimp: { name: 'a kiln imp', r: 0.34, mass: 1, fps: 8,
+  kilnimp: { name: 'a little devil', r: 0.34, mass: 1, fps: 8,
     update(e) {
       if (!e.dir || e.t > e.next || e.wallHit) {
         const a = e.angleToPlayer() + (e.rng.chance(0.5) ? 1 : -1) * e.rng.range(0.6, 1.2);

@@ -5,6 +5,7 @@ import { RNG } from '../core/rng.js';
 import { headTex, bodyTex } from '../render/art_player.js';
 import { enemyTex } from '../render/art_enemies.js';
 import { audio } from '../core/audio.js';
+import { touch } from '../core/touch.js';
 
 const W = 800, H = 500;
 
@@ -32,23 +33,23 @@ function house(ctx, rng, x, y, s, lit = true) {
 
 const PANELS = {
   intro: [
-    { text: "Grandma's house was quiet. Then it wasn't.", draw(ctx, rng) {
+    { text: "It was a quiet night at Grandma's. Then something went THUMP.", draw(ctx, rng) {
       ctx.fillStyle = '#1a1830'; ctx.fillRect(18, 18, W - 36, H - 118);
       for (let i = 0; i < 30; i++) dot(ctx, rng.range(30, W - 30), rng.range(30, 200), rng.range(1, 2.5), '#e8e0c0');
       blob(ctx, 660, 80, 34, 34, '#e8e0c0', rng, { lw: 3, hatch: 0.1 });
       poly(ctx, [[18, 330], [W - 18, 310], [W - 18, H - 100], [18, H - 100]], '#2a3a2a', rng, { lw: 4, hatch: 0.4 });
       house(ctx, rng, 400, 340, 1);
-      inkText(ctx, 'THUMP', 520, 150, 40, '#c8281e', { rot: 0.2, lw: 5 });
+      inkText(ctx, 'THUMP', 520, 150, 44, '#e0352a', { rot: 0.2, lw: 5, display: true });
     } },
-    { text: 'Something upstairs started calling his name. Wrong.', draw(ctx, rng) {
+    { text: "Something upstairs was calling his name. It didn't sound like Grandma.", draw(ctx, rng) {
       ctx.fillStyle = '#3a2a2a'; ctx.fillRect(18, 18, W - 36, H - 118);
       for (let i = 0; i < 7; i++) poly(ctx, [[200 + i * 60, 380 - i * 45], [320 + i * 60, 380 - i * 45], [320 + i * 60, 400 - i * 45], [200 + i * 60, 400 - i * 45]], '#5a4030', rng, { lw: 3, hatch: 0.3 });
       ctx.fillStyle = 'rgba(0,0,0,0.85)'; wobEllipse(ctx, 640, 120, 70, 110, rng, 0.15); ctx.fill();
       for (const d of [-1, 1]) { dot(ctx, 640 + d * 20, 100, 7, '#ffe0a0'); glow(ctx, 640 + d * 20, 100, 20, '#ffe0a0', 0.4); }
       kid(ctx, 150, 390, 1.6, 1, 'hurt');
-      inkText(ctx, 'Isaaaaiah...', 520, 260, 30, '#e8dcc0', { rot: -0.1, lw: 4 });
+      inkText(ctx, 'Isaaaaiah...', 520, 260, 30, '#e8dcc0', { rot: -0.1, lw: 4, display: true });
     } },
-    { text: 'So Isaiah hid where nobody ever goes.', draw(ctx, rng) {
+    { text: 'So Isaiah hid in the one place nobody ever goes.', draw(ctx, rng) {
       ctx.fillStyle = '#2a1e18'; ctx.fillRect(18, 18, W - 36, H - 118);
       for (let i = 0; i < 9; i++) poly(ctx, [[18 + i * 88, 200], [100 + i * 88, 198], [104 + i * 88, 226], [18 + i * 88, 228]], '#6a4a34', rng, { lw: 3, hatch: 0.3 });
       ctx.fillStyle = '#050304'; wobEllipse(ctx, 400, 300, 150, 60, rng, 0.06); ctx.fill();
@@ -56,7 +57,7 @@ const PANELS = {
       ctx.fillStyle = '#050304'; ctx.fillRect(250, 320, 300, 60);
       poly(ctx, [[540, 200], [660, 160], [668, 190], [548, 230]], '#6a4a34', rng, { lw: 3, hatch: 0.3 });
     } },
-    { text: 'The crawlspace went deeper than houses go.', draw(ctx, rng) {
+    { text: 'The crawlspace went down a lot farther than it should have.', draw(ctx, rng) {
       ctx.fillStyle = '#0a0606'; ctx.fillRect(18, 18, W - 36, H - 118);
       for (let i = 0; i < 6; i++) { ctx.strokeStyle = rgba('#5a3a2a', 0.8 - i * 0.12); ctx.lineWidth = 6; ctx.beginPath(); ctx.ellipse(400, 200, 320 - i * 50, 150 - i * 24, 0, 0, 7); ctx.stroke(); }
       kid(ctx, 400, 300, 0.9, 2, 'idle');
@@ -64,14 +65,14 @@ const PANELS = {
     } },
   ],
   ending: [
-    { text: 'The heart under the house stopped.', draw(ctx, rng) {
+    { text: 'The heart under the house finally stopped beating.', draw(ctx, rng) {
       ctx.fillStyle = '#2a0a0a'; ctx.fillRect(18, 18, W - 36, H - 118);
       const h = enemyTex('hm_heart', 0).image;
       ctx.globalAlpha = 0.7; ctx.drawImage(h, 260, 50, 280, 280); ctx.globalAlpha = 1;
       for (let i = 0; i < 20; i++) scribble(ctx, [[rng.range(40, 760), rng.range(30, 380)], [rng.range(40, 760), rng.range(30, 380)]], 1.5, rgba('#000000', 0.4), rng, 4);
       kid(ctx, 140, 380, 1.3, 1, 'shoot');
     } },
-    { text: 'Isaiah climbed up into the morning.', draw(ctx, rng) {
+    { text: 'Isaiah climbed back up just as the sun came up.', draw(ctx, rng) {
       const g = ctx.createLinearGradient(0, 18, 0, 380); g.addColorStop(0, '#f0c890'); g.addColorStop(1, '#e8a070');
       ctx.fillStyle = g; ctx.fillRect(18, 18, W - 36, H - 118);
       blob(ctx, 620, 120, 50, 50, '#fff0a0', rng, { lw: 3, hatch: 0.1 });
@@ -79,7 +80,7 @@ const PANELS = {
       house(ctx, rng, 300, 330, 0.9, false);
       kid(ctx, 560, 380, 1.3, 2, 'happy');
     } },
-    { text: 'The house was very quiet. He decided he liked it that way.', draw(ctx, rng) {
+    { text: 'The house was quiet again. The good kind of quiet.', draw(ctx, rng) {
       ctx.fillStyle = '#e8d8b8'; ctx.fillRect(18, 18, W - 36, H - 118);
       poly(ctx, [[200, 300], [600, 300], [620, 380], [180, 380]], '#8a5a3a', rng, { lw: 4, hatch: 0.3 });
       blob(ctx, 400, 290, 40, 12, '#e8e8e8', rng, { lw: 3 });
@@ -87,7 +88,7 @@ const PANELS = {
       // grandma's glasses, folded neatly
       ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(330, 296, 14, 0, 7); ctx.arc(368, 296, 14, 0, 7); ctx.stroke();
       kid(ctx, 520, 290, 1.1, 3, 'idle');
-      inkText(ctx, '(she always said he was brave)', 400, 120, 26, '#5a4a3a', { align: 'center', lw: 0, rot: -0.03 });
+      inkText(ctx, '(Grandma always said he was brave)', 400, 120, 26, '#5a4a3a', { align: 'center', lw: 0, rot: -0.03 });
     } },
   ],
 };
@@ -98,7 +99,7 @@ export function playPanels(which, done) {
   if (!list || !list.length) { done(); return; }
   let i = 0;
   const c = makeCanvas(W, H);
-  const hint = document.createElement('div'); hint.className = 'hint'; hint.textContent = 'any key to continue · Esc to skip';
+  const hint = document.createElement('div'); hint.className = 'hint'; hint.textContent = touch.active ? 'tap to continue' : 'any key to continue · Esc to skip';
   root.innerHTML = ''; root.appendChild(c); root.appendChild(hint); root.classList.add('active');
   const show = () => {
     const ctx = c.getContext('2d');

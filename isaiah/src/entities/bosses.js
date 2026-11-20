@@ -170,12 +170,12 @@ Object.assign(ENEMY_ART, ART);
 
 export const BOSS_INFO = {
   lump: { name: 'The Lump', art: 'lump' },
-  mildew: { name: 'Mother Mildew', art: 'mildew' },
+  mildew: { name: 'Mama Mold', art: 'mildew' },
   taproot: { name: 'Taproot', art: 'taproot', portraitFrame: 2 },
   rottwins: { name: 'The Rot Twins', art: 'gristle', art2: 'marrow' },
-  hog: { name: 'The Drowned Hog', art: 'hog' },
-  wellkeeper: { name: 'The Well-Keeper', art: 'wellkeeper' },
-  kilnfather: { name: 'The Kiln Father', art: 'kilnfather' },
+  hog: { name: 'The Sewer Hog', art: 'hog' },
+  wellkeeper: { name: 'The Drain Keeper', art: 'wellkeeper' },
+  kilnfather: { name: 'The Furnace Man', art: 'kilnfather' },
   ashhound: { name: 'The Ash Hound', art: 'ashhound' },
   housemother: { name: 'The Housemother', art: 'housemother' },
 };
@@ -239,7 +239,7 @@ DEFS.boss_lump = bossDef({ name: 'The Lump', art: 'lump', r: 1.05, wsize: [3.0, 
     e.flying = e.state === 'air';
   } });
 
-DEFS.boss_mildew = bossDef({ name: 'Mother Mildew', art: 'mildew', r: 0.95, flying: true, height: 0.6, wsize: [2.7, 2.7], shadow: 2.2, fps: 8,
+DEFS.boss_mildew = bossDef({ name: 'Mama Mold', art: 'mildew', r: 0.95, flying: true, height: 0.6, wsize: [2.7, 2.7], shadow: 2.2, fps: 8,
   update(e, dt) {
     if (enterPhase2(e)) for (let i = 0; i < 3; i++) spawnEnemy('halogn', e.x, e.z, { host: e, angle: (i / 3) * TAU });
     if (e.state === 'dash') {
@@ -346,7 +346,7 @@ DEFS.boss_marrow = bossDef({ name: 'Marrow', art: 'marrow', r: 0.65, wsize: [1.7
     }
   } });
 
-DEFS.boss_hog = bossDef({ name: 'The Drowned Hog', art: 'hog', r: 1.0, wsize: [2.75, 2.25], shadow: 2.6,
+DEFS.boss_hog = bossDef({ name: 'The Sewer Hog', art: 'hog', r: 1.0, wsize: [2.75, 2.25], shadow: 2.6,
   frame(e) { return e.state === 'charge' ? 2 : e.state === 'windup' ? (Math.floor(e.age * 20) % 2) : Math.floor(e.age * 5) % 2; },
   update(e, dt) {
     enterPhase2(e);
@@ -373,7 +373,7 @@ DEFS.boss_hog = bossDef({ name: 'The Drowned Hog', art: 'hog', r: 1.0, wsize: [2
     }
   } });
 
-DEFS.boss_wellkeeper = bossDef({ name: 'The Well-Keeper', art: 'wellkeeper', r: 0.95, wsize: [2.75, 3.0], shadow: 2.4, stationary: true, mass: 99,
+DEFS.boss_wellkeeper = bossDef({ name: 'The Drain Keeper', art: 'wellkeeper', r: 0.95, wsize: [2.75, 3.0], shadow: 2.4, stationary: true, mass: 99,
   frame(e) { return e.attack ? 1 : 0; },
   update(e, dt) {
     enterPhase2(e);
@@ -403,7 +403,7 @@ DEFS.boss_wellkeeper = bossDef({ name: 'The Well-Keeper', art: 'wellkeeper', r: 
     }
   } });
 
-DEFS.boss_kilnfather = bossDef({ name: 'The Kiln Father', art: 'kilnfather', r: 1.1, wsize: [3.0, 3.25], shadow: 2.6, mass: 99, stationary: true,
+DEFS.boss_kilnfather = bossDef({ name: 'The Furnace Man', art: 'kilnfather', r: 1.1, wsize: [3.0, 3.25], shadow: 2.6, mass: 99, stationary: true,
   frame(e) { return e.attack ? 1 : 0; },
   update(e, dt) {
     enterPhase2(e);
@@ -479,7 +479,7 @@ DEFS.boss_housemother = bossDef({ name: 'The Housemother', art: 'housemother', r
       if (h) { h.isBoss = true; h.main = e; }
       e.noBar = true;
       audio.play('roar'); addShake(1); audio.play('heartbeat');
-      S.game.banner('Her heart is showing', 'end it');
+      S.game.banner("Her heart's showing!", 'finish it');
       return;
     }
     if (e.phase === 2) {

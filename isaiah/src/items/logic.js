@@ -227,7 +227,7 @@ class Prop {
       if (p.coins <= 0) return;
       p.coins--; audio.play('coin');
       const r = rng.next();
-      if (r < 0.6) S.game.banner(rng.pick(FORTUNES), 'the machine whirs');
+      if (r < 0.6) S.game.banner(rng.pick(FORTUNES), 'your fortune');
       else if (r < 0.75) spawnReward('soul', out.x, out.z, rng);
       else if (r < 0.88) spawnReward('card', out.x, out.z, rng);
       else spawnReward('trinket', out.x, out.z, rng);
@@ -299,9 +299,10 @@ class Prop {
   }
 }
 const FORTUNES = [
-  'Grandma kept the good spoons down here.', 'Something is counting the stairs.', 'Your tears are worth more than you think.',
-  'Do not answer if the ceiling calls.', 'Lucky numbers: 4, 13, a half.', 'The Housemother never forgets a face.',
-  'A penny saved is a penny spent later.', 'Bring a candle. Bring two.', 'Someone left the light on for you.',
+  'Grandma hid the good silverware down here.', 'Something down here is counting the stairs.', 'Your tears are worth more than you think.',
+  "If the ceiling calls your name, don't answer.", 'Lucky numbers: 4, 13, and a half.', 'The Housemother never forgets a face.',
+  'A penny saved is a penny you can spend later.', 'Bring a flashlight. Bring two.', 'Somebody left the porch light on for you.',
+  'You will find a dollar. Then lose it.', 'Do not trust the clown in the storm drain.'
 ];
 
 export function spawnProp(o) { const p = new Prop(o); if (p.alive) S.misc.push(p); return p; }

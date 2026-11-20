@@ -125,7 +125,7 @@ export class Player {
       if (this.maxRed === 0 && this.soul.length === 0) this.soul.push('s', 's');
       this.invuln = 2;
       audio.play('soul');
-      S.game.banner('Not yet...', 'something pulled you back');
+      S.game.banner('Not yet!', 'something pulled you back')
       return;
     }
     this.dead = true;

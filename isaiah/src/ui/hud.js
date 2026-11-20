@@ -115,7 +115,7 @@ export class HUD {
   // ---- hearts -------------------------------------------------------------------
   drawHearts(ctx, p) {
     const x0 = 18, y0 = 14, s = 22, per = 6;
-    if (S.run.curse === 'unknown') { inkText(ctx, '? ? ?', x0, y0 + 18, 22, '#c81e1e'); return; }
+    if (S.run.curse === 'unknown') { inkText(ctx, '? ? ?', x0, y0 + 18, 22, '#e02a2a', { display: true }); return; }
     const icons = [];
     const full = Math.floor(p.red / 2), half = p.red % 2;
     const containers = Math.ceil(p.maxRed / 2);
@@ -274,7 +274,7 @@ export class HUD {
       ctx.globalAlpha = a;
       const y = 74 + (k < 0.1 ? -20 * (1 - k / 0.1) : 0);
       ctx.drawImage(parchment().image, this.VW / 2 - 230, y - 44, 460, 86);
-      inkText(ctx, b.title, this.VW / 2, y + 2, 32, '#2a1a10', { align: 'center', outline: '#f1e6cc', lw: 4 });
+      inkText(ctx, b.title, this.VW / 2, y + 4, b.title.length > 22 ? 24 : 30, '#2a1a10', { align: 'center', outline: '#f1e6cc', lw: 4, display: true });
       if (b.sub) inkText(ctx, b.sub, this.VW / 2, y + 28, 17, '#4a3a2a', { align: 'center', outline: '#f1e6cc', lw: 3 });
       ctx.globalAlpha = 1;
       if (k >= 1) this.banners.shift();
@@ -287,8 +287,8 @@ export class HUD {
       ctx.globalAlpha = a;
       const y = this.VH * 0.36;
       ctx.drawImage(parchment().image, this.VW / 2 - 260, y - 50, 520, 100);
-      inkText(ctx, f.name, this.VW / 2, y + 12, 44, '#2a1a10', { align: 'center', outline: '#f1e6cc', lw: 5 });
-      if (f.curse) inkText(ctx, f.curse, this.VW / 2, y + 74, 26, '#c03a3a', { align: 'center', lw: 5 });
+      inkText(ctx, f.name, this.VW / 2, y + 14, Math.min(42, this.VW / 13), '#2a1a10', { align: 'center', outline: '#f1e6cc', lw: 5, display: true });
+      if (f.curse) inkText(ctx, f.curse, this.VW / 2, y + 76, 24, '#e04a3a', { align: 'center', lw: 5, display: true });
       ctx.globalAlpha = 1;
       if (k >= 1) this.floorB = null;
     }
@@ -324,10 +324,10 @@ export class HUD {
     ctx.drawImage(pp, W * 0.25 - ps / 2 - (1 - ease) * 300, H * 0.18, ps, ps);
     const info = BOSS_INFO[it.id];
     if (info && info.portrait) { const bp = info.portrait().image; ctx.drawImage(bp, W * 0.75 - ps / 2 + (1 - ease) * 300, H * 0.14, ps, ps); }
-    inkText(ctx, S.player.charId === 'june' ? 'JUNE' : 'ISAIAH', W * 0.25, H * 0.86, fs, '#f1e6cc', { align: 'center', lw: 6 });
-    inkText(ctx, (info ? info.name : it.id).toUpperCase(), W * 0.75, H * 0.86, fs, '#ffd0a0', { align: 'center', lw: 6 });
+    inkText(ctx, S.player.charId === 'june' ? 'JUNE' : 'ISAIAH', W * 0.25, H * 0.86, fs, '#f1e6cc', { align: 'center', lw: 6, display: true });
+    inkText(ctx, (info ? info.name : it.id).toUpperCase(), W * 0.75, H * 0.86, fs, '#ffd0a0', { align: 'center', lw: 6, display: true });
     const vs = 1 + Math.max(0, 0.6 - it.t) * 2;
-    inkText(ctx, 'VS', W / 2, H * 0.55, 70 * vs, '#e8c040', { align: 'center', lw: 8, rot: -0.12 });
+    inkText(ctx, 'VS', W / 2, H * 0.55, 70 * vs, '#f0c830', { align: 'center', lw: 8, rot: -0.12, display: true });
     ctx.restore();
   }
 }

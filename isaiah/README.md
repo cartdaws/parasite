@@ -2,8 +2,8 @@
 
 A top-down roguelike twin-stick dungeon crawler (three.js + Vite, plain JS).
 Isaiah has hidden in the crawlspace under his grandmother's house — and it goes
-deeper than houses go: **The Crawlspace → The Root Cellar → The Flooded Well →
-The Bone Kiln → The Underneath**. He fights with his tears.
+deeper than houses go: **The Crawlspace → The Basement → The Storm Drain →
+The Boiler Room → The Underneath**. He fights with his tears.
 
 Every sprite, icon, door, card, portrait, story panel and sound is generated in
 code at runtime — there are no asset files.
@@ -34,8 +34,8 @@ npm run build      # static build in dist/
 - **Floors**: 13×13 cell grid grown breadth-first from the center (`3.33 × floor + 5–6` rooms), dead ends become Boss / Treasure / Shop rooms, plus optional Sacrifice, Challenge, Arcade and Library rooms and a hidden Secret room (bomb the wall; some walls show a tinted crack). 1×1, 1×2, 2×1, 2×2 and L-shaped rooms. 47 hand-authored 13×7 ASCII templates (`src/world/templates.js`), mirrored for variety.
 - **Doors** lock when you enter a room with enemies and slam open when it's clear; clears can drop a luck-weighted reward. Shops/libraries need a key, arcades a coin.
 - **31 enemy types** (flies, chasers, chargers, turrets, aligned shooters, hoppers, burrowers, spiders, splitting clots, exploders, creep-leavers, ghosts, a shielded knight, lobbers...) and **6 champion variants**.
-- **8 two-phase bosses** — The Lump, Mother Mildew, Taproot, The Rot Twins (shared bar), The Drowned Hog, The Well-Keeper, The Kiln Father, The Ash Hound — and **The Housemother**, whose foot, arms and eyes come through the walls and floor before her heart is exposed. Boss intro cards are skippable.
-- **91 items** (77 passive, 14 active) + **14 trinkets** via a data-driven hook system (`modifyTear`, `onFire`, `onTearHit`, `onEnemyKill`, `onRoomClear`, `onHurt`, `onFloorStart`, ...). Effects stack: homing + split = homing split shots, laser + multishot = several beams. Passives change Isaiah's look (thimble hat, horns, halo, third eye, wings...).
+- **8 two-phase bosses** — The Lump, Mama Mold, Taproot, The Rot Twins (shared bar), The Sewer Hog, The Drain Keeper, The Furnace Man, The Ash Hound — and **The Housemother**, whose foot, arms and eyes come through the walls and floor before her heart is exposed. Boss intro cards are skippable.
+- **91 items** (77 passive, 14 active) + **14 trinkets** via a data-driven hook system (`modifyTear`, `onFire`, `onTearHit`, `onEnemyKill`, `onRoomClear`, `onHurt`, `onFloorStart`, ...). Effects stack: homing + split = homing split shots, laser + multishot = several beams. Passives change Isaiah's look (thimble hat, devil horns, halo, third eye, wings...).
 - **Pools**: Treasure, Boss, Shop, Bargain (costs heart containers), Chapel (free, more likely if you skipped Bargains), Secret, Library — seeded, no repeats in a run.
 - **14 cards, 16 pills** (pill colors shuffled per seed, identified on use).
 - **Curses**: Darkness, the Lost, the Maze, the Unknown, the Labyrinth.

@@ -64,7 +64,7 @@ export const CFG = {
   },
 
   // ---- floors ---------------------------------------------------------------
-  FLOOR_NAMES: ['The Crawlspace', 'The Root Cellar', 'The Flooded Well', 'The Bone Kiln', 'The Underneath'],
+  FLOOR_NAMES: ['The Crawlspace', 'The Basement', 'The Storm Drain', 'The Boiler Room', 'The Underneath'],
   FLOOR_COUNT: 5,
   GRID_SIZE: 13,
   ROOMS_PER_FLOOR_MULT: 3.33,

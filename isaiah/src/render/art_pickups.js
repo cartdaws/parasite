@@ -161,7 +161,7 @@ function heartish(ctx, x, y, rng) {
 }
 export function priceTex(text, color = '#f1e6cc') {
   return tex(`price:${text}:${color}`, 96, 36, (ctx, w, h) => {
-    inkText(ctx, text, w / 2, h - 9, 22, color, { align: 'center', lw: 4 });
+    inkText(ctx, text, w / 2, h - 9, 22, color, { align: 'center', lw: 4, display: true });
   });
 }
 export function heartPriceTex(n) {

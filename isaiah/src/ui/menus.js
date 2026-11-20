@@ -13,6 +13,7 @@ import { itemIconTex } from '../render/art_items.js';
 import { ITEMS } from '../items/items.js';
 import { gfx } from '../render/gfx.js';
 import { playPanels } from './panels.js';
+import { CURSES } from '../run.js';
 import { goFullscreenLandscape, touch } from '../core/touch.js';
 
 export class UI {
@@ -124,7 +125,7 @@ export class UI {
       const n = document.createElement('div'); n.className = 'cname'; n.textContent = unlocked ? CHARACTERS[id].name : '???';
       c.appendChild(n);
       const desc = document.createElement('div'); desc.className = 'small';
-      desc.textContent = !unlocked ? 'beat The Housemother' : id === 'isaiah' ? '3 hearts · steady' : '2 hearts + 2 soul · hits harder · starts with a candle';
+      desc.textContent = !unlocked ? 'beat The Housemother' : id === 'isaiah' ? '3 hearts · steady' : '2 hearts + 2 soul · hits harder · starts with a birthday candle';
       c.appendChild(desc);
       if (unlocked) c.addEventListener('click', () => { this.charId = id; cards.forEach((x) => x.classList.remove('sel')); c.classList.add('sel'); audio.play('select'); });
       row.appendChild(c); cards.push(c);
@@ -203,7 +204,7 @@ export class UI {
     this.onBack = resume;
     const h = document.createElement('h2'); h.textContent = 'Paused'; d.appendChild(h);
     const seed = document.createElement('div'); seed.className = 'seed'; seed.textContent = 'Seed: ' + S.run.seed; d.appendChild(seed);
-    const fl = document.createElement('div'); fl.className = 'small'; fl.textContent = CFG.FLOOR_NAMES[S.floorNum - 1] + (S.run.curse ? ' — ' + S.run.curse : ''); d.appendChild(fl);
+    const fl = document.createElement('div'); fl.className = 'small'; fl.textContent = CFG.FLOOR_NAMES[S.floorNum - 1] + (S.run.curse ? ' · ' + CURSES[S.run.curse].name : ''); d.appendChild(fl);
     const st = S.player.stats;
     const stl = document.createElement('div'); stl.className = 'small';
     stl.textContent = `speed ${st.speed.toFixed(2)} · tears ${st.tears.toFixed(2)} · damage ${st.damage.toFixed(2)} · range ${st.range.toFixed(2)} · shot speed ${st.shotSpeed.toFixed(2)} · luck ${st.luck.toFixed(0)}`;
@@ -213,7 +214,7 @@ export class UI {
     d.appendChild(col);
     this.button(col, 'Resume', resume);
     this.button(col, 'Options', () => this.showOptions(() => this.showPause()));
-    this.button(col, 'Quit to Title', () => { S.game.cleanupRun(); audio.stopDrone(); this.showTitle(); });
+    this.button(col, 'Quit to Menu', () => { S.game.cleanupRun(); audio.stopDrone(); this.showTitle(); });
     this.focusIdx = 0; this.updateFocus();
   }
 
@@ -226,7 +227,7 @@ export class UI {
     d.appendChild(col);
     this.button(col, 'Try Again', () => this.startRun(randomSeedString(), this.charId));
     this.button(col, 'Same Seed', () => this.startRun(S.run.seed, this.charId));
-    this.button(col, 'Title', () => { S.game.cleanupRun(); this.showTitle(); });
+    this.button(col, 'Main Menu', () => { S.game.cleanupRun(); this.showTitle(); });
     this.focusIdx = 0; this.updateFocus();
   }
 
@@ -243,7 +244,7 @@ export class UI {
       d.appendChild(itemGrid(S.player));
       const col = document.createElement('div'); col.className = 'col';
       d.appendChild(col);
-      this.button(col, 'Title', () => { S.game.cleanupRun(); this.showTitle(); });
+      this.button(col, 'Main Menu', () => { S.game.cleanupRun(); this.showTitle(); });
       this.focusIdx = 0; this.updateFocus();
     });
   }
@@ -295,8 +296,8 @@ function titleArt() {
   const head = portraitTex('isaiah').image;
   ctx.drawImage(head, 330, 150, 100, 100);
   ctx.fillStyle = '#0a0606'; wobEllipse(ctx, 380, 252, 120, 24, rng, 0.05); ctx.fill();
-  inkText(ctx, 'The Finding of', 380, 66, 44, '#e8dcc0', { align: 'center', lw: 8, rot: -0.02 });
-  inkText(ctx, 'ISAIAH', 380, 142, 92, '#c8281e', { align: 'center', lw: 10, rot: 0.015 });
+  inkText(ctx, 'The Finding of', 380, 66, 42, '#e8dcc0', { align: 'center', lw: 8, rot: -0.02, display: true });
+  inkText(ctx, 'ISAIAH', 380, 146, 96, '#e0352a', { align: 'center', lw: 11, rot: 0.015, display: true });
   for (let i = 0; i < 6; i++) { const x = 250 + i * 50; ctx.fillStyle = 'rgba(160,20,20,0.85)'; ctx.beginPath(); ctx.ellipse(x + rng.range(-5, 5), 150 + rng.range(0, 14), 3, 6 + rng.range(0, 6), 0, 0, 7); ctx.fill(); }
   return c;
 }
@@ -308,14 +309,14 @@ function deathNote() {
   poly(ctx, [[20, 16], [500, 10], [506, 400], [14, 408]], '#ece2c8', rng, { lw: 3, hatch: 0.1, jit: 4 });
   for (let y = 70; y < 390; y += 26) scribble(ctx, [[40, y], [480, y + rng.range(-2, 2)]], 1, 'rgba(90,120,170,0.35)', rng, 1);
   const name = S.player.charId === 'june' ? 'June' : 'Isaiah';
-  inkText(ctx, 'My Last Will', 260, 56, 36, '#2a1a10', { align: 'center', lw: 0 });
-  inkText(ctx, `I, ${name}, was done in by`, 44, 98, 21, '#2a1a10', { lw: 0 });
+  inkText(ctx, 'MY LAST WILL', 260, 58, 34, '#2a1a10', { align: 'center', lw: 0, display: true });
+  inkText(ctx, `Here lies ${name}. Taken out by`, 44, 98, 21, '#2a1a10', { lw: 0 });
   inkText(ctx, String(S.run.killedBy || 'something'), 70, 128, 26, '#8a1a1a', { lw: 0 });
   inkText(ctx, `down in ${CFG.FLOOR_NAMES[S.floorNum - 1]}.`, 44, 158, 21, '#2a1a10', { lw: 0 });
-  inkText(ctx, 'I leave behind:', 44, 196, 21, '#2a1a10', { lw: 0 });
+  inkText(ctx, "Stuff I'm leaving behind:", 44, 196, 21, '#2a1a10', { lw: 0 });
   const ids = [...S.player.items]; if (S.player.active) ids.unshift(S.player.active.id);
   ids.slice(0, 24).forEach((id, i) => ctx.drawImage(itemIconTex(id).image, 52 + (i % 12) * 36, 206 + Math.floor(i / 12) * 38, 34, 34));
-  if (!ids.length) inkText(ctx, '...nothing much. some tears.', 70, 232, 20, '#5a4a3a', { lw: 0 });
+  if (!ids.length) inkText(ctx, '...nothing. just a lot of tears.', 70, 232, 20, '#5a4a3a', { lw: 0 });
   inkText(ctx, `${S.player.coins}¢   ${S.run.kills} monsters   ${formatTime(S.run.time)}`, 44, 310, 19, '#4a3a2a', { lw: 0 });
   inkText(ctx, `seed  ${S.run.seed}`, 44, 344, 22, '#2a1a10', { lw: 0 });
   // signature: a teary scribble

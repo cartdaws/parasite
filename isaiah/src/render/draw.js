@@ -59,31 +59,48 @@ export function wobPoly(ctx, pts, rng, jit = 1.2, closed = true) {
   });
   if (closed) ctx.closePath();
 }
-/** Fill the current path with a base color + crayon hatching, clipped to the path. */
+/**
+ * Fill the current path, clipped to it. With `bounds` ({x, y, w, h}) the fill is
+ * cartoon cel-shading: solid base, a shadow crescent toward the bottom right and
+ * a highlight toward the top left. A light crayon texture sits on top.
+ */
 export function crayonFill(ctx, color, rng, opts = {}) {
-  const { hatch = 0.22, light = 0.22, dark = -0.25, spacing = 3, angle = -0.8, shadeDir = true } = opts;
+  const { hatch = 0.22, light = 0.3, dark = -0.3, spacing = 3, angle = -0.8, shadeDir = true, bounds = null } = opts;
+  if (typeof color !== 'string' || color.startsWith('rgba')) { ctx.save(); ctx.fillStyle = color; ctx.fill(); ctx.restore(); return; }
   ctx.save();
   ctx.fillStyle = color;
   ctx.fill();
   ctx.clip();
-  const w = ctx.canvas.width, h = ctx.canvas.height;
-  // soft shading: darker at the bottom right, lighter top left
-  if (shadeDir) {
-    const g = ctx.createLinearGradient(0, 0, w * 0.6, h);
-    g.addColorStop(0, rgba(shade(color, light), 0.35));
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+  // cel-shading suits characters and props; big flat shapes (paper, walls, scenery) get a soft gradient
+  if (bounds && shadeDir && bounds.w < 150 && bounds.h < 150) {
+    const { x, y, w, h } = bounds;
+    // shadow everywhere, then the lit body offset up-left on top of it
+    ctx.fillStyle = shade(color, dark);
+    ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.ellipse(x + w * 0.44, y + h * 0.42, w * 0.56, h * 0.56, 0, 0, 7); ctx.fill();
+    // highlight
+    ctx.fillStyle = rgba(shade(color, light), 0.85);
+    ctx.beginPath(); ctx.ellipse(x + w * 0.3, y + h * 0.26, w * 0.16, h * 0.11, -0.5, 0, 7); ctx.fill();
+  } else if (shadeDir) {
+    const g = ctx.createLinearGradient(0, 0, W * 0.6, H);
+    g.addColorStop(0, rgba(shade(color, light), 0.3));
     g.addColorStop(0.55, rgba(color, 0));
-    g.addColorStop(1, rgba(shade(color, dark), 0.45));
+    g.addColorStop(1, rgba(shade(color, dark), 0.4));
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, W, H);
   }
-  if (hatch > 0) {
-    ctx.lineWidth = 1.2;
+  // light crayon grain (much subtler than before so shapes read cleanly when small)
+  const grain = hatch * 0.4;
+  if (grain > 0.01) {
+    ctx.lineWidth = 1;
     const ca = Math.cos(angle), sa = Math.sin(angle);
-    const L = w + h;
-    for (let d = -L; d < L; d += spacing + rng.next() * spacing) {
-      ctx.strokeStyle = rgba(rng.next() < 0.5 ? shade(color, light) : shade(color, dark), hatch * (0.5 + rng.next()));
+    const L = W + H;
+    for (let d = -L; d < L; d += spacing * 1.6 + rng.next() * spacing) {
+      ctx.strokeStyle = rgba(rng.next() < 0.5 ? shade(color, 0.2) : shade(color, -0.2), grain * (0.5 + rng.next()));
       ctx.beginPath();
-      const ox = w / 2 + d * -sa, oy = h / 2 + d * ca;
+      const ox = W / 2 + d * -sa, oy = H / 2 + d * ca;
       ctx.moveTo(ox - ca * L, oy - sa * L);
       ctx.lineTo(ox + ca * L, oy + sa * L);
       ctx.stroke();
@@ -91,23 +108,27 @@ export function crayonFill(ctx, color, rng, opts = {}) {
   }
   ctx.restore();
 }
-/** Crayon outline on the current path: a thick dark pass and a thin rough pass. */
+/** Bold marker outline on the current path, with a faint second pass for a hand-drawn edge. */
 export function ink(ctx, w = 3, color = INK) {
   ctx.save();
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.stroke();
-  ctx.globalAlpha = 0.35; ctx.lineWidth = Math.max(1, w * 0.4);
-  ctx.translate(0.8, 0.6); ctx.stroke();
+  ctx.strokeStyle = color; ctx.lineWidth = w * 1.12; ctx.stroke();
+  ctx.globalAlpha = 0.22; ctx.lineWidth = Math.max(1, w * 0.35);
+  ctx.translate(0.6, 0.5); ctx.stroke();
   ctx.restore();
 }
 export function blob(ctx, x, y, rx, ry, color, rng, opts = {}) {
-  wobEllipse(ctx, x, y, rx, ry, rng, opts.wob ?? 0.07, opts.n ?? 20, opts.rot ?? 0);
-  if (color) crayonFill(ctx, color, rng, opts);
+  wobEllipse(ctx, x, y, rx, ry, rng, opts.wob ?? 0.05, opts.n ?? 24, opts.rot ?? 0);
+  if (color) crayonFill(ctx, color, rng, { bounds: { x: x - rx, y: y - ry, w: rx * 2, h: ry * 2 }, ...opts });
   if (opts.ink !== false) ink(ctx, opts.lw ?? 3, opts.inkColor);
 }
 export function poly(ctx, pts, color, rng, opts = {}) {
-  wobPoly(ctx, pts, rng, opts.jit ?? 1.2);
-  if (color) crayonFill(ctx, color, rng, opts);
+  wobPoly(ctx, pts, rng, opts.jit ?? 0.9);
+  if (color) {
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const [x, y] of pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    crayonFill(ctx, color, rng, { bounds: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, ...opts });
+  }
   if (opts.ink !== false) ink(ctx, opts.lw ?? 3, opts.inkColor);
 }
 /** Wobbly stroked polyline */
@@ -149,10 +170,12 @@ export function glow(ctx, x, y, r, color, a = 0.6) {
 }
 
 /** Hand-lettered text with an ink outline */
-export const FONT = '"Patrick Hand", "Comic Neue", "Comic Sans MS", "Chalkboard SE", "Marker Felt", "Segoe Print", cursive';
+// Both faces are bundled (see src/fonts.js) so phones don't fall back to a serif.
+export const FONT = '"Patrick Hand", "Comic Neue", "Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif';
+export const DISPLAY = '"Luckiest Guy", "Patrick Hand", "Arial Black", Impact, sans-serif';
 export function inkText(ctx, text, x, y, size, color = '#f1e6cc', opts = {}) {
   ctx.save();
-  ctx.font = `${opts.weight || 'bold'} ${size}px ${FONT}`;
+  ctx.font = opts.display ? `normal ${size}px ${DISPLAY}` : `${opts.weight || 'bold'} ${size}px ${FONT}`;
   ctx.textAlign = opts.align || 'left';
   ctx.textBaseline = opts.baseline || 'alphabetic';
   if (opts.rot) { ctx.translate(x, y); ctx.rotate(opts.rot); x = 0; y = 0; }

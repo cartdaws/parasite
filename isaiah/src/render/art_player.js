@@ -4,13 +4,15 @@
 import { tex, blob, poly, scribble, eye, dot, ink, wobEllipse, crayonFill, shade, INK, glow, rgba } from './draw.js';
 
 export const CHARACTERS = {
+  // Isaiah: red T-shirt with a star, jeans, high-tops, a Band-Aid on his cheek
   isaiah: {
-    name: 'Isaiah', skin: '#e9c6a5', hair: '#3b2a20', shirt: '#7d8a3c', stripe: '#c9b458', pants: '#3e3a4a',
-    eyes: '#2a1a14', freckles: false, bandage: true, hairStyle: 'mess',
+    name: 'Isaiah', skin: '#e9c09a', hair: '#4a2e1c', shirt: '#d23a2e', stripe: '#ffd23e', pants: '#3f5f96',
+    shoes: '#f4f0e6', sole: '#c0302a', eyes: '#3a2414', freckles: false, bandage: true, hairStyle: 'mess', graphic: 'star',
   },
+  // June: his big sister — denim overalls over a yellow tee, red pigtails, freckles
   june: {
-    name: 'June', skin: '#f0cfb2', hair: '#b4532a', shirt: '#4f6e8c', stripe: '#d9d2bd', pants: '#5a3d2e',
-    eyes: '#2b3a4a', freckles: true, bandage: false, hairStyle: 'pigtails',
+    name: 'June', skin: '#f2cba8', hair: '#c4521e', shirt: '#f2be3a', stripe: '#3f6fa8', pants: '#3f6fa8',
+    shoes: '#f4f0e6', sole: '#3a8a4a', eyes: '#2b5a3a', freckles: true, bandage: false, hairStyle: 'pigtails', graphic: 'overalls',
   },
 };
 
@@ -159,23 +161,33 @@ export function bodyTex(charId, dir, frame, cos) {
       const a = step * 5;
       poly(ctx, [[cx - 4 + a, h - 16], [cx + a, h - 16], [cx + 1 + a, h - 4], [cx - 5 + a, h - 4]], ch.pants, rng, { lw: 2.2, hatch: 0 });
       poly(ctx, [[cx - 2 - a, h - 16], [cx + 3 - a, h - 16], [cx + 4 - a, h - 4], [cx - 2 - a, h - 4]], shade(ch.pants, -0.2), rng, { lw: 2.2, hatch: 0 });
-      blob(ctx, cx + a + 1, h - 4, 5, 3, '#e8e0d0', rng, { lw: 1.8, hatch: 0 });
-      blob(ctx, cx - a + 2, h - 4, 5, 3, '#ddd4c2', rng, { lw: 1.8, hatch: 0 });
+      blob(ctx, cx + a + 2, h - 4, 6, 3.4, ch.shoes, rng, { lw: 1.8, hatch: 0 });
+      blob(ctx, cx - a + 3, h - 4, 6, 3.4, shade(ch.shoes, -0.1), rng, { lw: 1.8, hatch: 0 });
+      scribble(ctx, [[cx + a - 3, h - 2], [cx + a + 7, h - 2]], 1.6, ch.sole, rng, 0.3);
     } else {
       for (const s of [-1, 1]) {
         const lift = step * s * 3;
         poly(ctx, [[cx + s * 7 - 3, h - 17], [cx + s * 7 + 3, h - 17], [cx + s * 7 + 3, h - 5 - lift], [cx + s * 7 - 3, h - 5 - lift]], ch.pants, rng, { lw: 2.2, hatch: 0 });
-        blob(ctx, cx + s * 7, h - 4 - lift, 4.5, 3, '#e8e0d0', rng, { lw: 1.8, hatch: 0 });
+        blob(ctx, cx + s * 7, h - 4 - lift, 5, 3.4, ch.shoes, rng, { lw: 1.8, hatch: 0 });
+        scribble(ctx, [[cx + s * 7 - 4, h - 2 - lift], [cx + s * 7 + 4, h - 2 - lift]], 1.6, ch.sole, rng, 0.3);
       }
     }
     // sweater torso (oversized)
     const tw = dir === 1 ? 13 : 16;
     poly(ctx, [[cx - tw, h - 14], [cx - tw + 3, h - 36], [cx + tw - 3, h - 36], [cx + tw, h - 14], [cx, h - 12]], shirt, rng, { lw: 2.6, hatch: 0.12 });
-    // stripes
-    ctx.save(); wobEllipse(ctx, cx, h - 24, tw, 12, rng, 0.02); ctx.clip();
-    ctx.strokeStyle = rgba(cos?.stripe || ch.stripe, 0.8); ctx.lineWidth = 2.6;
-    for (let y = h - 31; y < h - 12; y += 6) { ctx.beginPath(); ctx.moveTo(cx - tw, y + rng.range(-1, 1)); ctx.lineTo(cx + tw, y + rng.range(-1, 1)); ctx.stroke(); }
-    ctx.restore();
+    // chest graphic
+    if (dir !== 0) {
+      const gx = dir === 1 ? cx + 3 : cx, gy = h - 26;
+      if ((cos?.graphic || ch.graphic) === 'star') {
+        const pts = []; for (let i = 0; i < 10; i++) { const t = (i / 10) * Math.PI * 2 - Math.PI / 2, rr = i % 2 ? 2.6 : 6; pts.push([gx + Math.cos(t) * rr * (dir === 1 ? 0.7 : 1), gy + Math.sin(t) * rr]); }
+        poly(ctx, pts, cos?.stripe || ch.stripe, rng, { lw: 1.4, hatch: 0, jit: 0.2 });
+      } else {
+        // overalls bib + straps
+        poly(ctx, [[cx - 9, h - 14], [cx - 8, h - 29], [cx + 8, h - 29], [cx + 9, h - 14]], ch.stripe, rng, { lw: 2, hatch: 0.1 });
+        for (const sx of [-6, 6]) scribble(ctx, [[cx + sx, h - 29], [cx + sx * 1.3, h - 36]], 3, ch.stripe, rng, 0.3);
+        dot(ctx, cx - 6, h - 28, 1.4, '#e8d070'); dot(ctx, cx + 6, h - 28, 1.4, '#e8d070');
+      }
+    }
     // arms
     if (frame === 'hold') {
       for (const s of [-1, 1]) { poly(ctx, [[cx + s * (tw - 2), h - 34], [cx + s * (tw + 3), h - 34], [cx + s * (tw + 1), h - 44], [cx + s * (tw - 4), h - 44]], shirt, rng, { lw: 2.2, hatch: 0 }); }
@@ -186,7 +198,8 @@ export function bodyTex(charId, dir, frame, cos) {
     } else {
       for (const s of [-1, 1]) {
         const sw = step * s * 2;
-        poly(ctx, [[cx + s * tw - 2, h - 33], [cx + s * (tw + 4), h - 30], [cx + s * (tw + 3), h - 19 + sw], [cx + s * (tw - 2), h - 20 + sw]], shade(shirt, -0.12), rng, { lw: 2.2, hatch: 0 });
+        poly(ctx, [[cx + s * tw - 2, h - 33], [cx + s * (tw + 4), h - 30], [cx + s * (tw + 3), h - 19 + sw], [cx + s * (tw - 2), h - 20 + sw]], skin, rng, { lw: 2.2, hatch: 0 });
+        poly(ctx, [[cx + s * tw - 3, h - 34], [cx + s * (tw + 5), h - 31], [cx + s * (tw + 4), h - 26], [cx + s * (tw - 2), h - 27]], shade(shirt, -0.08), rng, { lw: 2.2, hatch: 0 });
         blob(ctx, cx + s * (tw + 1), h - 18 + sw, 3, 3, skin, rng, { lw: 1.8, hatch: 0 });
       }
     }
